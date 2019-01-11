@@ -1,6 +1,7 @@
 var webActionController = WebActionController();
 var scene = null;
 var camera = null;
+var renderer = null;
 
 var drone_model = null;
 var color = "#009933";
@@ -14,6 +15,13 @@ $(function () {
     setupGraphs();
     setupSelects();
     setupThree();
+});
+
+$( window ).resize(function() {
+    // Re init UI for new size
+    setupGraphs();
+    setupSelects();
+    updateThree();
 });
 
 
@@ -155,7 +163,7 @@ function setupThree()
     camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
     scene.background = new THREE.Color( 0x000000 );
     camera.position.z = 10;
-    var renderer = new THREE.WebGLRenderer();
+    renderer = new THREE.WebGLRenderer();
     var container = document.getElementById('canvas');
     var positionInfo = container.getBoundingClientRect();
 
@@ -197,4 +205,11 @@ function setupThree()
 
     // Start drawing
     GameLoop();
+}
+
+function updateThree()
+{
+    var container = document.getElementById('canvas');
+    var positionInfo = container.getBoundingClientRect();
+    renderer.setSize(positionInfo.width-2, positionInfo.height-2);
 }
