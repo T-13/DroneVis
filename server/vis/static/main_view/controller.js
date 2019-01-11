@@ -8,122 +8,12 @@ var color = "#009933";
 var source_url = "";
 
 $(function () {
+    // Construct url to load static files
     source_url = static_url + "main_view/";
 
-    scene = new THREE.Scene();
-    camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
-    scene.background = new THREE.Color( 0x000000 );
-    camera.position.z = 10;
-
-    var renderer = new THREE.WebGLRenderer();
-    var container = document.getElementById('canvas');
-    var positionInfo = container.getBoundingClientRect();
-
-    renderer.setSize(positionInfo.width-2, positionInfo.height-2);
-    container.appendChild(renderer.domElement);
-
-        var data = [
-            {
-              x: [0, 1, 2, 3, 4, 5, 6, 7, 8],
-              y: [0, 1, 2, 3, 4, 5, 6, 7, 8],
-              type: 'scatter',
-              marker: {
-                color: '#009933',
-                line: {
-                    width: 2.5
-                }
-            }
-            }
-          ];
-
-        var layout = {
-            paper_bgcolor: '#00000000',
-            plot_bgcolor: '#00000000',
-            xaxis: {
-                showgrid: true,
-                mirror: 'ticks',
-                tickfont: {
-                    color: 'snow'
-                    },
-                gridcolor: 'snow',
-                zerolinecolor: 'snow',
-                gridwidth: 1,
-                title: {
-                    text: 'X',
-                    font: {
-                        color: 'snow',
-                        size: 16
-                    }
-              }
-            },
-            yaxis: {
-                showgrid: true,
-                mirror: 'ticks',
-                tickfont: {
-                    color: 'snow'
-                    },
-                gridcolor: 'snow',
-                zerolinecolor: 'snow',
-                gridwidth: 2,
-                title: {
-                    text: 'Y',
-                    font: {
-                      color: 'snow',
-                      size: 16
-                    }
-                }
-            },
-            title: {
-                text: 'Some title',
-                font: {
-                    color: '#ffffff',
-                    size: 16
-                }
-            },
-            margin: {
-              l: 50,
-              r: 25,
-              b: 50,
-              t: 50
-            }
-
-          };
-    Plotly.newPlot('tester1', data, layout, {displayModeBar: false});
-    Plotly.newPlot('tester', data, layout, {displayModeBar: false});
-
-
-    var keyLight = new THREE.DirectionalLight(new THREE.Color('hsl(30, 100%, 75%)'), 1.0);
-    keyLight.position.set(-100, 0, 100);
-
-    var fillLight = new THREE.DirectionalLight(new THREE.Color('hsl(240, 100%, 75%)'), 0.75);
-    fillLight.position.set(100, 0, 100);
-
-    var backLight = new THREE.DirectionalLight(0xffffff, 1.0);
-    backLight.position.set(100, 0, -100).normalize();
-
-    scene.add(keyLight);
-    scene.add(fillLight);
-    scene.add(backLight);
-
-    var update = function () {
-        scene.rotation.x += 0.01;
-        scene.rotation.y += 0.01;
-    };
-
-    //draw scene
-    var render = function () {
-        renderer.render(scene, camera);
-    };
-
-    //run game loop (update, render, repeat)
-    var GameLoop = function () {
-        requestAnimationFrame(GameLoop);
-        update();
-        render();
-    };
-
+    setupGraphs();
     setupSelects();
-    GameLoop();
+    setupThree();
 });
 
 
@@ -156,7 +46,6 @@ function loadTexture(newColor)
         });
 }
 
-
 function setupSelects()
 {
     // To style only selects with the selectpicker class
@@ -187,4 +76,125 @@ function setupSelects()
         loadTexture(event.target.value);
     });
 
+}
+
+function setupGraphs()
+{
+    var data = [
+    {
+      x: [0, 1, 2, 3, 4, 5, 6, 7, 8],
+      y: [0, 1, 2, 3, 4, 5, 6, 7, 8],
+      type: 'scatter',
+      marker: {
+        color: '#009933',
+        line: {
+            width: 2.5
+        }
+      }
+    }];
+
+    var layout = {
+        paper_bgcolor: '#00000000',
+        plot_bgcolor: '#00000000',
+        xaxis: {
+            showgrid: true,
+            mirror: 'ticks',
+            tickfont: {
+                color: 'snow'
+                },
+            gridcolor: 'snow',
+            zerolinecolor: 'snow',
+            gridwidth: 1,
+            title: {
+                text: 'X',
+                font: {
+                    color: 'snow',
+                    size: 16
+                }
+          }
+        },
+        yaxis: {
+            showgrid: true,
+            mirror: 'ticks',
+            tickfont: {
+                color: 'snow'
+                },
+            gridcolor: 'snow',
+            zerolinecolor: 'snow',
+            gridwidth: 2,
+            title: {
+                text: 'Y',
+                font: {
+                  color: 'snow',
+                  size: 16
+                }
+            }
+        },
+        title: {
+            text: 'Some title',
+            font: {
+                color: '#ffffff',
+                size: 16
+            }
+        },
+        margin: {
+          l: 50,
+          r: 25,
+          b: 50,
+          t: 50
+        }
+      };
+    Plotly.newPlot('tester1', data, layout, {displayModeBar: false});
+    Plotly.newPlot('tester', data, layout, {displayModeBar: false});
+}
+
+function setupThree()
+{
+    // Create three.js scene and all needed objects
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+    scene.background = new THREE.Color( 0x000000 );
+    camera.position.z = 10;
+    var renderer = new THREE.WebGLRenderer();
+    var container = document.getElementById('canvas');
+    var positionInfo = container.getBoundingClientRect();
+
+    // Resize correctly
+    renderer.setSize(positionInfo.width-2, positionInfo.height-2);
+    container.appendChild(renderer.domElement);
+
+    // Create lights and add to scene
+    var keyLight = new THREE.DirectionalLight(new THREE.Color('hsl(30, 100%, 75%)'), 1.0);
+    keyLight.position.set(-100, 0, 100);
+
+    var fillLight = new THREE.DirectionalLight(new THREE.Color('hsl(240, 100%, 75%)'), 0.75);
+    fillLight.position.set(100, 0, 100);
+
+    var backLight = new THREE.DirectionalLight(0xffffff, 1.0);
+    backLight.position.set(100, 0, -100).normalize();
+
+    scene.add(keyLight);
+    scene.add(fillLight);
+    scene.add(backLight);
+
+    // Change rotation of model correctly
+    var update = function () {
+        scene.rotation.x += 0.01;
+        scene.rotation.y += 0.01;
+    };
+
+    //draw scene
+    var render = function () {
+        renderer.render(scene, camera);
+    };
+
+    //run game loop (update, render, repeat)
+    var GameLoop = function () {
+        requestAnimationFrame(GameLoop);
+        update();
+        render();
+    };
+
+    // Start drawing
+    GameLoop();
 }
