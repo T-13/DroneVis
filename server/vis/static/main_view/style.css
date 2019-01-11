@@ -58,8 +58,33 @@ p{
     width: 84px;
     padding: 12px;
     background: #000000AA;
+    border: 1px solid snow;
+    border-radius: 3px;
 }
 #texture_select:hover
 {
-    background: snow;
+    background: aliceblue;
+}
+
+#offline_indicator
+{
+    position: absolute;
+
+    top: 30vh;
+    z-index: 9001;
+    display: table-cell;
+    vertical-align: middle;
+
+    border-top: 1px solid #009933;
+    border-bottom: 1px solid #009933;
+    background: #000000DD;
+    color: #009933;
+    font-weight: bolder;
+    font-size: 5vw;
+    text-align: center;
+    width: 100vw;
+    height: 40vh;
+    margin: auto;
+
+    padding: 0;
 }

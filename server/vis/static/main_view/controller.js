@@ -9,6 +9,8 @@ var color = "#009933";  // Default same as graphs
 
 var source_url = "";
 
+var isOnline = false;
+
 $(function () {
     // Construct url to load static files
     source_url = static_url + "main_view/";
@@ -16,6 +18,16 @@ $(function () {
 
     // Is called when socket receives new data
     var onNewData = function (data) {
+        isOnline = data.online;
+        if(isOnline) {
+            $("#offline_indicator").hide();
+
+            // Update graph and cmd line data here
+        }
+        else {
+            $("#offline_indicator").show();
+        }
+
         console.log(data);
     };
 
@@ -25,7 +37,7 @@ $(function () {
     webActionController.setupWebSocket(onNewData);  // Connect to server
 });
 
-$( window ).resize(function() {
+$(window).resize(function () {
     // Re init UI for new size
     setupGraphs();
     updateThree();
@@ -33,8 +45,7 @@ $( window ).resize(function() {
 });
 
 // Loads a new model as "the drone"
-function loadModel(obj)
-{
+function loadModel(obj) {
     if (drone_model)
         scene.remove(drone_model);
 
@@ -55,21 +66,21 @@ function loadModel(obj)
     scene.add(drone_model);
     loadTexture(color)
 }
+
 // Loads new rgb onto "the drone" model
-function loadTexture(newColor)
-{
+function loadTexture(newColor) {
     color = newColor;
     var selectedObject = scene.getObjectByName("drone");
     if (selectedObject)
         selectedObject.traverse(function (child) {
             if (child instanceof THREE.Mesh) {
-                child.material = new THREE.MeshPhongMaterial({ color: color });
+                child.material = new THREE.MeshPhongMaterial({color: color});
             }
         });
 }
+
 // Sets up UI for user input (texture and model)
-function setupSelects()
-{
+function setupSelects() {
     // To style only selects with the selectpicker class
     $('.selectpicker').selectpicker();
     // Add event to select element
@@ -95,21 +106,21 @@ function setupSelects()
     });
 
 }
+
 // Init graphs
-function setupGraphs()
-{
+function setupGraphs() {
     var data = [
-    {
-      x: [0, 1, 2, 3, 4, 5, 6, 7, 8],
-      y: [0, 1, 2, 3, 4, 5, 6, 7, 8],
-      type: 'scatter',
-      marker: {
-        color: '#009933',
-        line: {
-            width: 2.5
-        }
-      }
-    }];
+        {
+            x: [0, 1, 2, 3, 4, 5, 6, 7, 8],
+            y: [0, 1, 2, 3, 4, 5, 6, 7, 8],
+            type: 'scatter',
+            marker: {
+                color: '#009933',
+                line: {
+                    width: 2.5
+                }
+            }
+        }];
 
     var layout = {
         paper_bgcolor: '#00000000',
@@ -119,7 +130,7 @@ function setupGraphs()
             mirror: 'ticks',
             tickfont: {
                 color: 'snow'
-                },
+            },
             gridcolor: 'snow',
             zerolinecolor: 'snow',
             gridwidth: 1,
@@ -129,22 +140,22 @@ function setupGraphs()
                     color: 'snow',
                     size: 16
                 }
-          }
+            }
         },
         yaxis: {
             showgrid: true,
             mirror: 'ticks',
             tickfont: {
                 color: 'snow'
-                },
+            },
             gridcolor: 'snow',
             zerolinecolor: 'snow',
             gridwidth: 2,
             title: {
                 text: 'Y',
                 font: {
-                  color: 'snow',
-                  size: 16
+                    color: 'snow',
+                    size: 16
                 }
             }
         },
@@ -156,22 +167,22 @@ function setupGraphs()
             }
         },
         margin: {
-          l: 50,
-          r: 25,
-          b: 50,
-          t: 50
+            l: 50,
+            r: 25,
+            b: 50,
+            t: 50
         }
-      };
+    };
     Plotly.newPlot('tester1', data, layout, {displayModeBar: false});
     Plotly.newPlot('tester', data, layout, {displayModeBar: false});
 }
+
 // Init three.js
-function setupThree()
-{
+function setupThree() {
     // Create three.js scene and all needed objects
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
-    scene.background = new THREE.Color( 0x000000 );
+    scene.background = new THREE.Color(0x000000);
     camera.position.z = 10;
     renderer = new THREE.WebGLRenderer();
     var container = document.getElementById('canvas');
@@ -192,7 +203,7 @@ function setupThree()
     };
     var spawnerOptions = {
         spawnRate: 1000,
-        horizontalSpeed:1,
+        horizontalSpeed: 1,
         verticalSpeed: 1,
         timeScale: 0.1
     };
@@ -202,7 +213,7 @@ function setupThree()
     scene.add(particleSystem);
 
     // Resize correctly
-    renderer.setSize(positionInfo.width-2, positionInfo.height-2);
+    renderer.setSize(positionInfo.width - 2, positionInfo.height - 2);
     container.appendChild(renderer.domElement);
 
     // Create lights and add to scene
@@ -219,7 +230,7 @@ function setupThree()
 
     // Create floor
     var floor = new THREE.Mesh(
-        new THREE.BoxGeometry(100, 1, 15), new THREE.MeshLambertMaterial({ color: 0x0d0d0d }));
+        new THREE.BoxGeometry(100, 1, 15), new THREE.MeshLambertMaterial({color: 0x0d0d0d}));
     // All objects need to cast and receive shadows
     floor.castShadow = true;
     floor.receiveShadow = true;
@@ -238,8 +249,13 @@ function setupThree()
 
     // Change rotation of model correctly
     var update = function () {
-        drone_model.rotation.x += 0.01;
-        drone_model.rotation.y += 0.01;
+        if(!isOnline) {
+            drone_model.rotation.x += 0.01;
+            drone_model.rotation.y += 0.01;
+        }
+        else {
+            // Update drone model to correct rotation from server HERE
+        }
     };
 
     //draw scene with effect
@@ -274,11 +290,11 @@ function setupThree()
     // Start drawing
     GameLoop();
 }
+
 // Update three.js size
-function updateThree()
-{
+function updateThree() {
     var container = document.getElementById('canvas');
     var positionInfo = container.getBoundingClientRect();
-    renderer.setSize(positionInfo.width-2, positionInfo.height-2);
+    renderer.setSize(positionInfo.width - 2, positionInfo.height - 2);
     effect.setSize(container.offsetWidth, container.offsetHeight);
 }
