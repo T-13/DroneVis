@@ -5,7 +5,11 @@ var camera = null;
 var drone_model = null;
 var color = "#FFFFFF";
 
+var source_url = "";
+
 $(function () {
+    source_url = static_url + "main_view/";
+
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
     scene.background = new THREE.Color( 0x000000 );
@@ -117,7 +121,6 @@ $(function () {
         update();
         render();
     };
-
 
     setupSelects();
     GameLoop();
