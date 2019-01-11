@@ -1,0 +1,62 @@
+#main_display
+{
+    height: 90vh;
+    width: 80vw;
+    margin: auto;
+}
+
+body
+{
+    background: url("background.png") no-repeat center center fixed;
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+
+    font-family: Ubuntu;
+    font-style: normal;
+    font-variant: normal;
+}
+
+p{
+    color: snow;
+    font-style: initial;
+    font-size:larger;
+}
+.text{
+    padding: 5px;
+}
+.graph{
+    width: 40vw;
+    height: 45vh;
+
+    background: #000000AA;
+    margin: 5px;
+
+    border: 1px solid snow;
+}
+
+.dropdown-toggle{
+    height: 42px;
+    background: #000000AA;
+    color: snow;
+}
+
+.navbar-t13{
+    padding-left: 20vh;
+    padding-right: 20vh;
+    background: #000000AA;
+    color: snow;
+}
+
+#texture_select
+{
+    height: 42px;
+    width: 84px;
+    padding: 12px;
+    background: #000000AA;
+}
+#texture_select:hover
+{
+    background: snow;
+}
