@@ -4,7 +4,7 @@ var camera = null;
 var renderer = null;
 
 var drone_model = null;
-var color = "#009933";
+var color = "#009933";  // Default same as graphs
 
 var source_url = "";
 
@@ -15,16 +15,22 @@ $(function () {
     setupGraphs();
     setupSelects();
     setupThree();
+
+    // Is called when socket receives new data
+    var onNewData = function (data) {
+        console.log(data);
+    };
+    webActionController.setupWebSocket(onNewData);  // Connect to server
+
 });
 
 $( window ).resize(function() {
     // Re init UI for new size
     setupGraphs();
-    setupSelects();
     updateThree();
 });
 
-
+// Loads a new model as "the drone"
 function loadModel(obj)
 {
     if (drone_model)
@@ -40,6 +46,7 @@ function loadModel(obj)
     drone_model.position.y = 0;
     loadTexture(color)
 }
+// Loads new rgb onto "the drone" model
 function loadTexture(newColor)
 {
     color = newColor;
@@ -53,7 +60,7 @@ function loadTexture(newColor)
             }
         });
 }
-
+// Sets up UI for user input (texture and model)
 function setupSelects()
 {
     // To style only selects with the selectpicker class
@@ -85,7 +92,7 @@ function setupSelects()
     });
 
 }
-
+// Init graphs
 function setupGraphs()
 {
     var data = [
@@ -155,7 +162,7 @@ function setupGraphs()
     Plotly.newPlot('tester1', data, layout, {displayModeBar: false});
     Plotly.newPlot('tester', data, layout, {displayModeBar: false});
 }
-
+// Init three.js
 function setupThree()
 {
     // Create three.js scene and all needed objects
@@ -206,7 +213,7 @@ function setupThree()
     // Start drawing
     GameLoop();
 }
-
+// Update three.js size
 function updateThree()
 {
     var container = document.getElementById('canvas');

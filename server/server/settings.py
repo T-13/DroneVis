@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'bootstrap',
     'fontawesome',
     'jquery',
+    'channels',
 
     'vis.apps.VisConfig',
 ]
@@ -75,7 +76,15 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'server.wsgi.application'
-
+ASGI_APPLICATION = 'server.routing.application'
+CHANNEL_LAYERS = {
+    'default': {
+        'BACKEND': 'channels_redis.core.RedisChannelLayer',
+        'CONFIG': {
+            "hosts": [('localhost', 6379)],
+        },
+    },
+}
 
 # Database
 # https://docs.djangoproject.com/en/2.1/ref/settings/#databases
