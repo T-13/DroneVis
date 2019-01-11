@@ -3,9 +3,13 @@ var scene = null;
 var camera = null;
 
 var drone_model = null;
-var color = "#FFFFFF";
+var color = "#009933";
+
+var source_url = "";
 
 $(function () {
+    source_url = static_url + "main_view/";
+
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
     scene.background = new THREE.Color( 0x000000 );
@@ -118,7 +122,6 @@ $(function () {
         render();
     };
 
-
     setupSelects();
     GameLoop();
 });
@@ -141,7 +144,7 @@ function loadModel(obj)
 }
 function loadTexture(newColor)
 {
-    color = newColor
+    color = newColor;
     var selectedObject = scene.getObjectByName("drone");
     if(selectedObject)
         selectedObject.traverse(function(child)

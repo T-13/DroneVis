@@ -33,6 +33,12 @@
     <link rel="shortcut icon" href="{% static 'main_view/favicon.ico' %}">
     <script src="{% static 'main_view/webActionController.js' %}"></script>
     <script src="{% static 'main_view/controller.js' %}"></script>
+
+    <script>
+        var static_url = "{% get_static_prefix %}";
+        var media_url = "{% get_media_prefix %}";
+    </script>
+
 </head>
 
 <body>
@@ -48,7 +54,7 @@
         </select>
         <label for="texture_select" style="margin-right: 10px; margin-left: 20px">Select texture:
         </label>
-        <input id="texture_select" type="color" value="#ffffff" autocomplete="off"/>
+        <input id="texture_select" type="color" value="#009933" autocomplete="off"/>
     </nav>
 
 	<div id="main_display" class="container-full">
