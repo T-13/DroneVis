@@ -25,6 +25,8 @@ p{
 }
 .text{
     padding: 5px;
+
+    overflow: auto;
 }
 .graph{
     width: 40vw;
@@ -34,6 +36,7 @@ p{
     margin: 5px;
 
     border: 1px solid snow;
+
 }
 
 .dropdown-toggle{
