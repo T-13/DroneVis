@@ -1,7 +1,40 @@
-# DroneVisServer
+# DroneVis
 
-### How to setup on Ubuntu 18.0.4:
-Dependencies:
+Drone telemetry visualization project at FERI. Contains final project product, usable for remote telemetry viewing of any drone data (MAVLink currently supported).
+
+This repository contains everything required to set up the software visualization. Refer to the [wiki](https://github.com/T-13/DroneVis/wiki) for detailed documentation on flight firmware, hardware components, wiring and getting data to DroneVis.
+
+
+### Features
+
+- Drone Rotation Visualization
+  - Model Selection
+  - Object Color Selection
+- Graph Visualization
+  - Pitch, Roll, Yaw, ...
+- Giver applications
+  - MAVLink decoder
+
+
+## Components
+
+### Server
+
+Django web application (`vis`) serves static front-end website, runs sqlite database and provides websocket API for givers (below).
+
+### Givers
+
+Client applications which obtains data, decodes it if necessary and sends it to server for visualization.
+
+**Current Givers:**
+- MAVLink (via serial port)
+
+
+## Setup
+
+#### How to setup on Ubuntu 18.0.4:
+
+**Dependencies:**
 - Python 3.5 or newer (Ubuntu 18.0.4 has 3.6.5 by default)
 - Django
     - `pip3 install django`
@@ -24,6 +57,7 @@ Dependencies:
     - `pip3 install channels_redis`
 
 ### Simple step by step guide:
+
 1. Clone this repository
 2. If desired create python3 virtual environment or skip this step
     - `python3-dev` package required
