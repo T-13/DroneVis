@@ -32,7 +32,17 @@ Client applications which obtain data, decode it if necessary and send it to ser
 
 ## Setup
 
-#### How to setup on Ubuntu 18.0.4:
+### Docker
+
+- Install [Docker](https://www.docker.com/)
+- [Linux] Install [Docker Compose](https://docs.docker.com/compose/install/)
+- Run Docker (or `docker.service` on Linux)
+- Run `$ docker-compose build` to build the Docker image
+- Run `$ docker-compose up` to run the image
+
+### Manual
+
+#### Ubuntu (18.0.4)
 
 **Dependencies:**
 - Python 3.5 or newer (Ubuntu 18.0.4 has 3.6.5 by default)
@@ -56,7 +66,7 @@ Client applications which obtain data, decode it if necessary and send it to ser
 - Correct channel layer backend for Django Channels [channels_redis](https://github.com/django/channels_redis)
     - `pip3 install channels_redis`
 
-### Simple step by step guide:
+#### Simple step by step guide
 
 1. Clone this repository
 2. If desired create python3 virtual environment or skip this step
