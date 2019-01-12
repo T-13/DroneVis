@@ -14,20 +14,20 @@ function WebActionController() {
                 timeout: 0,
             })
     };
-    
-    var setupWebSocket = function (updateFunction) {
-        socket = new WebSocket('ws://' + window.location.host +
-        '/socket/0/');
 
-        console.log("Socket connecting to server");
+    var setupWebSocket = function (updateFunction) {
+        var link = 'ws://' + window.location.host + '/socket/0/';
+        socket = new WebSocket(link);
+        console.log("Socket connecting to " + link);
 
         socket.onmessage = function(e) {
+            console.log(e.data);
             var data = JSON.parse(e.data);
             updateFunction(data);
         };
 
         socket.onclose = function(e) {
-            console.log('Chat socket closed');
+            console.log('Socket closed');
         };
     };
 

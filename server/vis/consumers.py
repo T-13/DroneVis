@@ -3,6 +3,10 @@ import json
 
 sockets = dict()
 givers = []
+disconnect_msg = json.dumps(
+                        {
+                            "online": False
+                        })
 
 class DataConsumer(AsyncWebsocketConsumer):
 
@@ -31,10 +35,7 @@ class DataConsumer(AsyncWebsocketConsumer):
             for key, value in sockets.items():
                 # if receiver
                 if value == 0:
-                    self.send(text_data=json.dumps(
-                        {
-                            "online": False
-                        }))
+                    await key.send(text_data=disconnect_msg)
 
         sockets.pop(self)   # Remove from sockets
 

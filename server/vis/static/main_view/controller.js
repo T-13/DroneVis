@@ -27,8 +27,6 @@ $(function () {
         else {
             $("#offline_indicator").show();
         }
-
-        console.log(data);
     };
 
     setupGraphs();
@@ -250,8 +248,10 @@ function setupThree() {
     // Change rotation of model correctly
     var update = function () {
         if(!isOnline) {
-            drone_model.rotation.x += 0.01;
-            drone_model.rotation.y += 0.01;
+            if(drone_model) {
+                drone_model.rotation.x += 0.01;
+                drone_model.rotation.y += 0.01
+            }
         }
         else {
             // Update drone model to correct rotation from server HERE
