@@ -105,3 +105,7 @@ venv.bak/
 
 # JetBrains
 .idea
+
+# redis backup dump
+*/dump.rdb
+dump.rdb
