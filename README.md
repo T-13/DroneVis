@@ -34,7 +34,7 @@ Client applications which obtain data, decode it if necessary and send it to ser
 
 ### Docker
 
-- Install [Docker](https://www.docker.com/)
+- Install [Docker](https://www.docker.com/get-started)
 - [Linux] Install [Docker Compose](https://docs.docker.com/compose/install/)
 - Run Docker (or `docker.service` on Linux)
 - Run `$ docker-compose build` to build the Docker image
