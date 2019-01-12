@@ -3,7 +3,6 @@ var scene = null;
 var camera = null;
 var renderer = null;
 var effect = null;
-var target = { x: 0, y: 0, z: 0 };
 var position = { x: 0, y: 0, z: 0 };
 var drone_model = null;
 var color = "#009933";  // Default same as graphs
