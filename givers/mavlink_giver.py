@@ -16,7 +16,7 @@ def on_close(ws):
     print("### Connection closed ###")
 
 
-# Gets Parses mavlink data to json string
+# Parses mavlink data to json string
 def mav_as_json(port=None):
     # TODO - Retrieve data from port
 
