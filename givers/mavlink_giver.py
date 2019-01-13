@@ -1,98 +1,104 @@
 import sys
-import argparse
-from time import sleep
 
-import websocket
-import json
+import giver
 
 import serial
+from pymavlink import mavutil
+from datetime import datetime
 
 
-# Parses MAVLink data as JSON string
-def mavlink_as_json(port=None):
-    # TODO Retrieve data from port
-
-    # TODO Replace random with correct values
-    data = {
-        "online": True,
-        "roll": random.uniform(0.0, 360.0),
-        "pitch": random.uniform(0.0, 360.0),
-        "yaw": random.uniform(0.0, 360.0),
-    }
-
-    return json.dumps(data)
+HEARTBEAT_WAIT = 1
 
 
-def main():
-    # Parse parameters
-    parser = argparse.ArgumentParser(description="Decode and send MAVLink data from serial port to Team13 DroneVis Server.")
-    parser.add_argument("-d", default=None, metavar="<device>", required=True,
-                        help="serial device")
-    parser.add_argument("-b", type=int, default=115200, metavar="<baud rate>",
-                        help="baud rate (default: 115200)")
-    parser.add_argument("-r", type=int, default=4, metavar="<stream rate>",
-                        help="stream rate (default: 4)")
-    parser.add_argument("-a", type=str, default="0.0.0.0:8000", metavar="<ip:port>",
-                        help="address of DroneVis Server (default: 0.0.0.0:8000 - local server)")
-    parser.add_argument("-i", type=int, default=100, metavar="<interval>",
-                        help="interval of packet sending in milliseconds, too low might cause connection issues (default: 100)")
-    parser.add_argument("-v", action="store_true", default=False,
-                        help="verbose output (log all data to stdout)")
-    args = parser.parse_args()
+# MAVLink data giver
+class MAVLinkGiver(giver.Giver):
+    def __init__(self):
+        self.device = None
+        self.baudrate = 0
+        self.streamrate = 0
+        self.conn = None
 
-    if ":" not in args.a:
-        parser.error("argument -a: invalid choice: {} (must contain IP and port)".format(args.a))
-        return 1
+        self.last_heartbeat_time = datetime.min
+        self.data = {
+            "online": False,
+            "armed": False,
+            "roll": 0.0,
+            "pitch": 0.0,
+            "yaw": 0.0,
+            "heading": 0.0,
+            "throttle": 0.0,
+        }
 
-    if args.i < 1:
-        parser.error("argument -i: invalid choice: {} (choose above 0)".format(args.i))
-        return 1
+    def get_data(self):
+        # Grab a MAVLink message
+        msg = self.conn.recv_match(blocking=False)
+        if msg:
+            msg_type = msg.get_type()
 
-    if args.b < 0:
-        parser.error("argument -b: invalid choice: {} (choose above 0)".format(args.b))
-        return 1
+            if msg_type == "HEARTBEAT":
+                self.last_heartbeat_time = datetime.now()
+                self.data["online"] = True
+                self.data["armed"] = (msg.base_mode & mavutil.mavlink.MAV_MODE_FLAG_SAFETY_ARMED)
+            if msg_type == "ATTITUDE":
+                self.data["roll"] = msg.roll
+                self.data["pitch"] = msg.pitch
+                self.data["yaw"] = msg.yaw
+            if msg_type == "VFR_HUD":
+                self.data["heading"] = msg.heading
+                self.data["throttle"] = msg.throttle
+            if msg_type == "RC_CHANNELS_RAW":
+                self.data["ch1"] = msg.chan1_raw
+                self.data["ch2"] = msg.chan2_raw
+                self.data["ch3"] = msg.chan3_raw
+                self.data["ch4"] = msg.chan4_raw
 
-    if args.r < 0:
-        parser.error("argument -r: invalid choice: {} (choose above 0)".format(args.r))
-        return 1
+        # Invalidate data (set to offline) if heartbeat not received for some time
+        heartbeat_delta = datetime.now() - self.last_heartbeat_time
+        if heartbeat_delta.seconds > HEARTBEAT_WAIT:
+            self.data["online"] = False
 
-    # Convert milliseconds to seconds
-    seconds = args.i / 1000.0
+        return self.data
 
-    # Connect to WebSocket
-    socketUrl = "ws://{}/socket/1/".format(args.a)
-    print("Connecting to: {}...".format(socketUrl))
+    def prepare(self):
+        # Create MAVLink serial instance
+        conn = mavutil.mavlink_connection(self.device, baud=self.baudrate)
+        self.conn = conn
 
-    try:
-        conn = websocket.create_connection(socketUrl)
-    except Exception as e:
-        print("Error! Unable to open WebSocket connection!\n=> {}".format(e))
-        return 2
+        # Wait for heartbeat message to find system ID
+        print("=> Waiting for MAVLink heartbeat...")
+        conn.wait_heartbeat()
+        print("=> Received MAVLink heartbeat!")
 
-    print("Connected!")
+        # Request data to be sent a the given rate
+        conn.mav.request_data_stream_send(conn.target_system, conn.target_component,
+                                          mavutil.mavlink.MAV_DATA_STREAM_ALL,
+                                          self.streamrate, 1)
 
-    # TODO Open serial port
+    def cleanup(self):
+        self.conn.close()
 
-    # Send data until keyboard interrupt or connection error
-    try:
-        while True:
-            data = mavlink_as_json()
+    def add_arguments(self, parser):
+        parser.add_argument("-d", default=None, metavar="<device>", required=True,
+            help="serial device")
+        parser.add_argument("-b", type=int, default=115200, metavar="<baud rate>",
+            help="baud rate (default: 115200)")
+        parser.add_argument("-r", type=int, default=4, metavar="<stream rate>",
+            help="stream rate (default: 4)")
 
-            if args.v:
-                print(data)
+    def verify_arguments(self, parser, args):
+        if args.d is None:
+            parser.error("argument -d: invalid choice: {} (choose a valid device)".format(args.d))
 
-            ws.send(data)
-            sleep(seconds)
-    except KeyboardInterrupt:
-        print("Closing connection...")
-    except Exception as e:
-        print("Error! Connection lost!\n=> {}".format(e))
+        if args.b < 0:
+            parser.error("argument -b: invalid choice: {} (choose above 0)".format(args.b))
 
-    # Cleanup
-    conn.close()
+        if args.r < 0:
+            parser.error("argument -r: invalid choice: {} (choose above 0)".format(args.r))
 
-    return 0
+        self.device, self.baudrate, self.streamrate = args.d, args.b, args.r
+
+        if args.i > 10:
+            print("Warning! Low interval required for MAVLink to receive data consistently!")
 
 
-if __name__ == "__main__":
-    sys.exit(main())
+giver.run(MAVLinkGiver())
