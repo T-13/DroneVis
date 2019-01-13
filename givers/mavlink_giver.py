@@ -27,6 +27,14 @@ class MAVLinkGiver(giver.Giver):
             "yaw": 0.0,
             "heading": 0.0,
             "throttle": 0.0,
+            "rc_ch1": 0,
+            "rc_ch2": 0,
+            "rc_ch3": 0,
+            "rc_ch4": 0,
+            "rc_ch5": 0,
+            "rc_ch6": 0,
+            "rc_ch7": 0,
+            "rc_ch8": 0,
         }
 
     def get_data(self):
@@ -47,10 +55,14 @@ class MAVLinkGiver(giver.Giver):
                 self.data["heading"] = msg.heading
                 self.data["throttle"] = msg.throttle
             if msg_type == "RC_CHANNELS_RAW":
-                self.data["ch1"] = msg.chan1_raw
-                self.data["ch2"] = msg.chan2_raw
-                self.data["ch3"] = msg.chan3_raw
-                self.data["ch4"] = msg.chan4_raw
+                self.data["rc_ch1"] = msg.chan1_raw
+                self.data["rc_ch2"] = msg.chan2_raw
+                self.data["rc_ch3"] = msg.chan3_raw
+                self.data["rc_ch4"] = msg.chan4_raw
+                self.data["rc_ch5"] = msg.chan5_raw
+                self.data["rc_ch6"] = msg.chan6_raw
+                self.data["rc_ch7"] = msg.chan7_raw
+                self.data["rc_ch8"] = msg.chan8_raw
 
         # Invalidate data (set to offline) if heartbeat not received for some time
         heartbeat_delta = datetime.now() - self.last_heartbeat_time
