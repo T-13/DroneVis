@@ -33,8 +33,8 @@ class Giver(abc.ABC):
 def run(giver):
     # Parse parameters
     parser = argparse.ArgumentParser(description="Send random (test/example) data to Team13 DroneVis Server.")
-    parser.add_argument("-a", type=str, default="0.0.0.0:8000", metavar="<ip:port>",
-                        help="address of DroneVis Server (default: 0.0.0.0:8000 - local server)")
+    parser.add_argument("-a", type=str, default="localhost:8000", metavar="<ip:port>",
+                        help="address of DroneVis Server (default: localhost:8000 - local server)")
     parser.add_argument("-i", type=int, default=10, metavar="<interval>",
                         help=("interval of packet sending in milliseconds, "
                               "too low might cause connection issues, "
