@@ -109,3 +109,6 @@ venv.bak/
 # redis backup dump
 */dump.rdb
 dump.rdb
+
+# OBJ models
+*.obj
