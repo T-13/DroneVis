@@ -24,10 +24,13 @@ Django web application (`vis`) serves static front-end website, runs sqlite data
 
 ### Givers
 
-Client applications which obtain data, decode it if necessary and send it to server for visualization.
+Client applications which obtain data, decode it if necessary and send it to server for visualization. Also known as providers.
+
+All gives are named `type_giver.py` and can be executed directly, in the background they import `giver.py` which handles the overall connection to DroneVis Server. Simply subclassing `Giver` allows for easy implementation of any protocols, decoders or generators.
 
 **Current Givers:**
-- MAVLink (via serial port)
+- Random (test/example)
+- MAVLink (via serial port, using `pymavlink`)
 
 
 ## Setup

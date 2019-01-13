@@ -1,80 +1,116 @@
 import sys
-import argparse
 
-import websocket
-from time import sleep
+import giver
+
 import serial
-import json
-
-import random
-
-def on_error(ws, error):
-    print(error)
+from pymavlink import mavutil
+from datetime import datetime
 
 
-def on_close(ws):
-    print("### Connection closed ###")
+HEARTBEAT_WAIT = 1
 
 
-# Parses mavlink data to json string
-def mav_as_json(port=None):
-    # TODO - Retrieve data from port
+# MAVLink data giver
+class MAVLinkGiver(giver.Giver):
+    def __init__(self):
+        self.device = None
+        self.baudrate = 0
+        self.streamrate = 0
+        self.conn = None
 
-    # TODO - Replace random with correct values
-    data = {
-        "online": True,
-        "roll": random.randint(1,360),
-        "pitch": random.randint(1,360),
-        "yaw": random.randint(1,360),
-    }
-    return json.dumps(data)
+        self.last_heartbeat_time = datetime.min
+        self.data = {
+            "online": False,
+            "armed": False,
+            "roll": 0.0,
+            "pitch": 0.0,
+            "yaw": 0.0,
+            "heading": 0.0,
+            "throttle": 0.0,
+            "rc_ch1": 0,
+            "rc_ch2": 0,
+            "rc_ch3": 0,
+            "rc_ch4": 0,
+            "rc_ch5": 0,
+            "rc_ch6": 0,
+            "rc_ch7": 0,
+            "rc_ch8": 0,
+        }
 
-def main():
+    def get_data(self):
+        # Grab a MAVLink message
+        msg = self.conn.recv_match(blocking=False)
+        if msg:
+            msg_type = msg.get_type()
 
-    try:
-        # Define parameters
-        parser = argparse.ArgumentParser(
-            description="Receive mavlink data from serial port and send to T13 DroneVisServer as Json")
+            if msg_type == "HEARTBEAT":
+                self.last_heartbeat_time = datetime.now()
+                self.data["online"] = True
+                self.data["armed"] = (msg.base_mode & mavutil.mavlink.MAV_MODE_FLAG_SAFETY_ARMED)
+            if msg_type == "ATTITUDE":
+                self.data["roll"] = msg.roll
+                self.data["pitch"] = msg.pitch
+                self.data["yaw"] = msg.yaw
+            if msg_type == "VFR_HUD":
+                self.data["heading"] = msg.heading
+                self.data["throttle"] = msg.throttle
+            if msg_type == "RC_CHANNELS_RAW":
+                self.data["rc_ch1"] = msg.chan1_raw
+                self.data["rc_ch2"] = msg.chan2_raw
+                self.data["rc_ch3"] = msg.chan3_raw
+                self.data["rc_ch4"] = msg.chan4_raw
+                self.data["rc_ch5"] = msg.chan5_raw
+                self.data["rc_ch6"] = msg.chan6_raw
+                self.data["rc_ch7"] = msg.chan7_raw
+                self.data["rc_ch8"] = msg.chan8_raw
 
-        parser.add_argument('-a', metavar='<server address>', type=str, required=True,
-                            help='Domain/IP of server')
-        parser.add_argument('-p', metavar='<serial port>', type=str, required=True,
-                            help='Serial port through which data is received')
-        parser.add_argument('-t', metavar='<int: send interval in ms>', type=int, required=True,
-                            help='How many ms pass between each packet')
-        args = parser.parse_args()  # Get parameter values
+        # Invalidate data (set to offline) if heartbeat not received for some time
+        heartbeat_delta = datetime.now() - self.last_heartbeat_time
+        if heartbeat_delta.seconds > HEARTBEAT_WAIT:
+            self.data["online"] = False
 
-        # Connect to WebSocket
-        socket_url = "ws://" + args.a + "/socket/1/"
-        print("Connecting to: " + socket_url)
-        ws = websocket.create_connection(socket_url,
-                                    on_error=on_error,
-                                    on_close=on_close)
+        return self.data
 
-        # Get ms
-        milies = args.t if args.t >= 200 else 200
-        seconds = milies/1000
+    def prepare(self):
+        # Create MAVLink serial instance
+        conn = mavutil.mavlink_connection(self.device, baud=self.baudrate)
+        self.conn = conn
 
-        # TODO - Open serial port
+        # Wait for heartbeat message to find system ID
+        print("=> Waiting for MAVLink heartbeat...")
+        conn.wait_heartbeat()
+        print("=> Received MAVLink heartbeat!")
 
-        # loop infinitely
-        try:
-            print("Connected")
-            while True:
-                ws.send(mav_as_json())  # Pass serial port object to this function to get data as JSON
-                sleep(seconds)
+        # Request data to be sent a the given rate
+        conn.mav.request_data_stream_send(conn.target_system, conn.target_component,
+                                          mavutil.mavlink.MAV_DATA_STREAM_ALL,
+                                          self.streamrate, 1)
 
-        # Cancel on keyboard interrupt
-        except KeyboardInterrupt as e:
-            print(e)
-            ws.close()
-            return 0
+    def cleanup(self):
+        self.conn.close()
 
-    # Except any error
-    except Exception as e:
-        print(e)
-        return -1
+    def add_arguments(self, parser):
+        parser.add_argument("-d", default=None, metavar="<device>", required=True,
+            help="serial device")
+        parser.add_argument("-b", type=int, default=115200, metavar="<baud rate>",
+            help="baud rate (default: 115200)")
+        parser.add_argument("-r", type=int, default=4, metavar="<stream rate>",
+            help="stream rate (default: 4)")
+
+    def verify_arguments(self, parser, args):
+        if args.d is None:
+            parser.error("argument -d: invalid choice: {} (choose a valid device)".format(args.d))
+
+        if args.b < 0:
+            parser.error("argument -b: invalid choice: {} (choose above 0)".format(args.b))
+
+        if args.r < 0:
+            parser.error("argument -r: invalid choice: {} (choose above 0)".format(args.r))
+
+        self.device, self.baudrate, self.streamrate = args.d, args.b, args.r
+
+        if args.i > 10:
+            print("Warning! Low interval required for MAVLink to receive data consistently!")
 
 
-if __name__ == '__main__':
-    sys.exit(main())
+giver.run(MAVLinkGiver())
