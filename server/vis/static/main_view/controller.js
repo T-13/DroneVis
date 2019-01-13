@@ -6,9 +6,11 @@ var effect = null;
 var position = { x: 0, y: 0, z: 0 };
 var drone_model = null;
 var color = "#009933";  // Default same as graphs
-
+var layout1;
+var layout2;
+var xPlot = 0;
 var source_url = "";
-
+var armedValue, onlineValue, firstCheckArmed = true, firstCheckOnline = true;
 var isOnline = false;
 
 $(function () {
@@ -27,6 +29,66 @@ $(function () {
             drone_model.rotation.x = position.x;
             drone_model.rotation.y = position.y;
             drone_model.rotation.z = position.z;
+
+            var update = { x: [[++xPlot], [++xPlot], [++xPlot]], y: [[data.pitch], [data.yaw], [data.roll]] };
+            if (data.pitch != null || data.yaw != null || data.roll != null) {
+                Plotly.extendTraces('tester1', update, [0, 1, 2], 10);
+            }
+            var trace1 = {
+                type: 'bar',
+                x: [1, 2, 3, 4, 5, 6, 7, 8],
+                y: [data.rc_ch1, data.rc_ch2, data.rc_ch3, data.rc_ch4, data.rc_ch5, data.rc_ch6, data.rc_ch7, data.rc_ch8],
+                marker: {
+                    color: '#009933',
+                    line: {
+                        width: 2.5
+                    }
+                }
+            };
+
+            var dataGraph = [trace1];
+            Plotly.newPlot('tester', dataGraph, layout2, { responsive: true });
+            if(data.armed != null && data.online != null)
+            {
+                if(armedValue != data.armed || firstCheckArmed)
+                {
+                    var para = document.createElement("P");
+                    var text;
+                    if(data.armed)
+                    {
+                        text = "Armed: True";
+                    }
+                    else
+                    {
+                        text = "Armed: False";
+                    }
+                    var t = document.createTextNode(text);
+                    para.appendChild(t);
+                    document.getElementById("textData").appendChild(para); 
+                    armedValue = data.armed;
+                    firstCheckArmed = false;
+                }
+    
+                if(onlineValue != data.online || firstCheckOnline)
+                {
+                    var para = document.createElement("P");
+                    var text;
+                    if(data.online)
+                    {
+                        text = "Online: True";
+                    }
+                    else
+                    {
+                        text = "Online: False";
+                    }
+                    var t = document.createTextNode(text);
+                    para.appendChild(t);
+                    document.getElementById("textData").appendChild(para); 
+                    onlineValue = data.online;
+                    firstCheckOnline = false;
+                }
+            }
+            
         }
         else {
             $("#offline_indicator").show();
@@ -43,7 +105,6 @@ $(window).resize(function () {
     // Re init UI for new size
     setupGraphs();
     updateThree();
-    setupSelects();
 });
 
 // Loads a new model as "the drone"
@@ -108,23 +169,15 @@ function setupSelects() {
     });
 
 }
-
 // Init graphs
 function setupGraphs() {
-    var data = [
-        {
-            x: [0, 11, 22, 33, 44, 55, 66, 77, 88],
-            y: [0, 1, 2, 3, 4, 5, 6, 7, 8],
-            type: 'scatter',
-            marker: {
-                color: '#009933',
-                line: {
-                    width: 2.5
-                }
-            }
-        }];
-
-    var layout = {
+    layout1 = {
+        legend: {
+            font: {
+                size: 13,
+                color: '#ffffff'
+              }
+          },
         paper_bgcolor: '#00000000',
         plot_bgcolor: '#00000000',
         xaxis: {
@@ -137,7 +190,7 @@ function setupGraphs() {
             zerolinecolor: 'snow',
             gridwidth: 1,
             title: {
-                text: 'X',
+                text: 'Time',
                 font: {
                     color: 'snow',
                     size: 16
@@ -154,7 +207,7 @@ function setupGraphs() {
             zerolinecolor: 'snow',
             gridwidth: 2,
             title: {
-                text: 'Y',
+                text: 'Angle',
                 font: {
                     color: 'snow',
                     size: 16
@@ -162,7 +215,7 @@ function setupGraphs() {
             }
         },
         title: {
-            text: 'Some title',
+            text: 'Roll/Pitch/Yaw',
             font: {
                 color: '#ffffff',
                 size: 16
@@ -175,8 +228,111 @@ function setupGraphs() {
             t: 50
         }
     };
-    Plotly.newPlot('tester1', data, layout, { displayModeBar: false });
-    Plotly.newPlot('tester', data, layout, { displayModeBar: false });
+    layout2 = {
+        paper_bgcolor: '#00000000',
+        plot_bgcolor: '#00000000',
+        xaxis: {
+            showgrid: true,
+            mirror: 'ticks',
+            tickfont: {
+                color: 'snow'
+            },
+            gridcolor: 'snow',
+            zerolinecolor: 'snow',
+            gridwidth: 1,
+            title: {
+                text: 'Channel',
+                font: {
+                    color: 'snow',
+                    size: 16
+                }
+            }
+        },
+        yaxis: {
+            showgrid: true,
+            mirror: 'ticks',
+            tickfont: {
+                color: 'snow'
+            },
+            gridcolor: 'snow',
+            zerolinecolor: 'snow',
+            gridwidth: 2,
+            title: {
+                text: 'Value',
+                font: {
+                    color: 'snow',
+                    size: 16
+                }
+            }
+        },
+        title: {
+            text: 'PPM',
+            font: {
+                color: '#ffffff',
+                size: 16
+            }
+        },
+        margin: {
+            l: 50,
+            r: 25,
+            b: 50,
+            t: 50
+        }
+    };
+    Plotly.newPlot('tester1', [
+        {
+            x: [0],
+            y: [0],
+            type: 'scatter',
+            name: 'Pitch',
+            marker: {
+                color: '#009933',
+                line: {
+                    width: 2.5
+                }
+            }
+        },
+        {
+            x: [0],
+            y: [0],
+            type: 'scatter',
+            name: 'Yaw',
+            marker: {
+                color: '#3366ff',
+                line: {
+                    width: 2.5
+                }
+            }
+        },
+        {
+            x: [0],
+            y: [0],
+            type: 'scatter',
+            name: 'Roll',
+            marker: {
+                color: '#ff0000',
+                line: {
+                    width: 2.5
+                }
+            }
+        }], layout1, { displayModeBar: false });
+
+    var trace1 = {
+        type: 'bar',
+        x: [1, 2, 3, 4, 5, 6, 7, 8],
+        y: [1, 11, 12, 13, 14, 15, 14, 13],
+        marker: {
+            color: '#009933',
+            line: {
+                width: 2.5
+            }
+        }
+    };
+
+    var data = [trace1];
+
+
+    Plotly.newPlot('tester', data, layout2, { responsive: true });
 }
 
 // Init three.js
@@ -247,7 +403,7 @@ function setupThree() {
 
     // Create effect
     effect = new THREE.AnaglyphEffect(renderer);
-    effect.setSize(container.offsetWidth, container.offsetHeight);
+    effect.setSize(container.offsetWidth - 2, container.offsetHeight - 2);
 
     // Change rotation of model correctly
     var update = function () {
