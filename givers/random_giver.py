@@ -5,14 +5,11 @@ from time import sleep
 import websocket
 import json
 
-import serial
+import random
 
 
-# Parses MAVLink data as JSON string
-def mavlink_as_json(port=None):
-    # TODO Retrieve data from port
-
-    # TODO Replace random with correct values
+# Generates random data as JSON string
+def random_as_json(port=None):
     data = {
         "online": True,
         "roll": random.uniform(0.0, 360.0),
@@ -25,13 +22,7 @@ def mavlink_as_json(port=None):
 
 def main():
     # Parse parameters
-    parser = argparse.ArgumentParser(description="Decode and send MAVLink data from serial port to Team13 DroneVis Server.")
-    parser.add_argument("-d", default=None, metavar="<device>", required=True,
-                        help="serial device")
-    parser.add_argument("-b", type=int, default=115200, metavar="<baud rate>",
-                        help="baud rate (default: 115200)")
-    parser.add_argument("-r", type=int, default=4, metavar="<stream rate>",
-                        help="stream rate (default: 4)")
+    parser = argparse.ArgumentParser(description="Send random (test/example) data to Team13 DroneVis Server.")
     parser.add_argument("-a", type=str, default="0.0.0.0:8000", metavar="<ip:port>",
                         help="address of DroneVis Server (default: 0.0.0.0:8000 - local server)")
     parser.add_argument("-i", type=int, default=100, metavar="<interval>",
@@ -46,14 +37,6 @@ def main():
 
     if args.i < 1:
         parser.error("argument -i: invalid choice: {} (choose above 0)".format(args.i))
-        return 1
-
-    if args.b < 0:
-        parser.error("argument -b: invalid choice: {} (choose above 0)".format(args.b))
-        return 1
-
-    if args.r < 0:
-        parser.error("argument -r: invalid choice: {} (choose above 0)".format(args.r))
         return 1
 
     # Convert milliseconds to seconds
@@ -71,17 +54,15 @@ def main():
 
     print("Connected!")
 
-    # TODO Open serial port
-
     # Send data until keyboard interrupt or connection error
     try:
         while True:
-            data = mavlink_as_json()
+            data = random_as_json()
 
             if args.v:
                 print(data)
 
-            ws.send(data)
+            conn.send(data)
             sleep(seconds)
     except KeyboardInterrupt:
         print("Closing connection...")
