@@ -3,14 +3,12 @@ var scene = null;
 var camera = null;
 var renderer = null;
 var effect = null;
-var position = { x: 0, y: 0, z: 0 };
 var drone_model = null;
 var color = "#009933";  // Default same as graphs
 var layout1;
 var layout2;
 var xPlot = 0;
 var source_url = "";
-var armedValue, onlineValue, firstCheckArmed = true, firstCheckOnline = true;
 var isOnline = false;
 
 $(function () {
@@ -24,15 +22,13 @@ $(function () {
         if (isOnline) {
             $("#offline_indicator").hide();
 
-            // Update graph and cmd line data here
-            position = { x: data.roll, y: data.pitch, z: data.yaw };
-            drone_model.rotation.x = position.x;
-            drone_model.rotation.y = position.y;
-            drone_model.rotation.z = position.z;
+            // Update model
+            drone_model.rotation.set(data.pitch, -data.yaw, -data.roll);
 
+            // Update graphs
             var update = { x: [[++xPlot], [++xPlot], [++xPlot]], y: [[data.pitch], [data.yaw], [data.roll]] };
             if (data.pitch != null || data.yaw != null || data.roll != null) {
-                Plotly.extendTraces('tester1', update, [0, 1, 2], 10);
+                Plotly.extendTraces('graph_attitude', update, [0, 1, 2], 10);
             }
             var trace1 = {
                 type: 'bar',
@@ -47,50 +43,13 @@ $(function () {
             };
 
             var dataGraph = [trace1];
-            Plotly.newPlot('tester', dataGraph, layout2, { responsive: true });
-            if(data.armed != null && data.online != null)
-            {
-                if(armedValue != data.armed || firstCheckArmed)
-                {
-                    var para = document.createElement("P");
-                    var text;
-                    if(data.armed)
-                    {
-                        text = "Armed: True";
-                    }
-                    else
-                    {
-                        text = "Armed: False";
-                    }
-                    var t = document.createTextNode(text);
-                    para.appendChild(t);
-                    document.getElementById("textData").appendChild(para); 
-                    armedValue = data.armed;
-                    firstCheckArmed = false;
-                }
-    
-                if(onlineValue != data.online || firstCheckOnline)
-                {
-                    var para = document.createElement("P");
-                    var text;
-                    if(data.online)
-                    {
-                        text = "Online: True";
-                    }
-                    else
-                    {
-                        text = "Online: False";
-                    }
-                    var t = document.createTextNode(text);
-                    para.appendChild(t);
-                    document.getElementById("textData").appendChild(para); 
-                    onlineValue = data.online;
-                    firstCheckOnline = false;
-                }
-            }
-            
-        }
-        else {
+            Plotly.newPlot('graph_rc_channels', dataGraph, layout2, { responsive: true });
+
+            // Update text
+            var para = document.getElementById("data_text");
+            para.innerHTML = "<p>Armed: " + (data.armed ? "Yes" : "No") + "</p>" +
+                             "<p>Heading: " + data.heading + "°</p>"
+        } else {
             $("#offline_indicator").show();
         }
     };
@@ -123,9 +82,7 @@ function loadModel(obj) {
     });
 
     // Add to scene, set position and load correct texture
-    drone_model.position.z = 0;
-    drone_model.position.x = 0;
-    drone_model.position.y = 0;
+    drone_model.position.set(0, 0, 0);
     scene.add(drone_model);
     loadTexture(color)
 }
@@ -266,7 +223,7 @@ function setupGraphs() {
             }
         },
         title: {
-            text: 'PPM',
+            text: 'RC Channels',
             font: {
                 color: '#ffffff',
                 size: 16
@@ -279,7 +236,7 @@ function setupGraphs() {
             t: 50
         }
     };
-    Plotly.newPlot('tester1', [
+    Plotly.newPlot('graph_attitude', [
         {
             x: [0],
             y: [0],
@@ -332,7 +289,7 @@ function setupGraphs() {
     var data = [trace1];
 
 
-    Plotly.newPlot('tester', data, layout2, { responsive: true });
+    Plotly.newPlot('graph_rc_channels', data, layout2, { responsive: true });
 }
 
 // Init three.js
@@ -405,7 +362,7 @@ function setupThree() {
     effect = new THREE.AnaglyphEffect(renderer);
     effect.setSize(container.offsetWidth - 2, container.offsetHeight - 2);
 
-    // Change rotation of model correctly
+    // Rotate model slowly when data feed is disconnected
     var update = function () {
         if (!isOnline) {
             if (drone_model) {

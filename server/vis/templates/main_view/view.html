@@ -1,9 +1,9 @@
 <html>
 
 <head>
-	<title>DroneVis</title>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>DroneVis</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
 
     {% load static %}
 
@@ -50,9 +50,9 @@
         </label>
         <select id="object_select" class="selectpicker" data-live-search="true" autocomplete="off">
           {% for model in models %}
-                <option value="{{ model.id }}">
-                    {{ model.name }}
-                </option>
+              <option value="{{ model.id }}">
+                  {{ model.name }}
+              </option>
           {% endfor %}
         </select>
         <label for="texture_select" style="margin-right: 10px; margin-left: 20px">Select texture:
@@ -64,16 +64,15 @@
         <span style=" position: relative; top: 30%">OFFLINE</span>
     </div>
 
-	<div id="main_display" class="container-full">
-			<div class="row">
-				<div id="canvas" class="graph"></div>
-				<div id="tester1" class="graph"></div>
-			</div>
-			<div class="row">
-					<div id="tester" class="graph"></div>
-					<div class="graph text" id="textData">
-					</div>
-			</div>
+    <div id="main_display" class="container-full">
+        <div class="row">
+            <div id="canvas" class="graph"></div>
+            <div id="graph_attitude" class="graph"></div>
+        </div>
+        <div class="row">
+            <div id="graph_rc_channels" class="graph"></div>
+            <div id="data_text" class="graph text"></div>
+        </div>
     </div>
 </body>
 
