@@ -354,10 +354,10 @@ function setupThree() {
         velocityRandomness: 5,
         color: 0xaa88ff,
         colorRandomness: 10,
-        turbulence: 10,
-        lifetime: 10,
+        turbulence: 1,
+        lifetime: 100,
         size: 20,
-        sizeRandomness: 100
+        sizeRandomness: 10
     };
     var spawnerOptions = {
         spawnRate: 1000,
