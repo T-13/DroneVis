@@ -35,10 +35,10 @@ def run(giver):
     parser = argparse.ArgumentParser(description="Send random (test/example) data to Team13 DroneVis Server.")
     parser.add_argument("-a", type=str, default="localhost:8000", metavar="<ip:port>",
                         help="address of DroneVis Server (default: localhost:8000 - local server)")
-    parser.add_argument("-i", type=int, default=10, metavar="<interval>",
+    parser.add_argument("-i", type=int, default=100, metavar="<interval>",
                         help=("interval of packet sending in milliseconds, "
                               "too low might cause connection issues, "
-                              "too high might cause data decoding issues (default: 10)"))
+                              "too high might cause data decoding issues (default: 100)"))
     parser.add_argument("-v", action="store_true", default=False,
                         help="verbose output (log all data to stdout)")
 

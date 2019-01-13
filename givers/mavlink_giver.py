@@ -2,16 +2,15 @@ import sys
 
 import giver
 
-import serial
+import threading
 from pymavlink import mavutil
 from datetime import datetime
 
 
-HEARTBEAT_WAIT = 1
-
-
 # MAVLink data giver
 class MAVLinkGiver(giver.Giver):
+    HEARTBEAT_WAIT = 1
+
     def __init__(self):
         self.device = None
         self.baudrate = 0
@@ -37,12 +36,15 @@ class MAVLinkGiver(giver.Giver):
             "rc_ch8": 0,
         }
 
-    def get_data(self):
-        # Grab a MAVLink message
-        msg = self.conn.recv_match(blocking=False)
-        if msg:
-            msg_type = msg.get_type()
+    def mav_read(self, stop):  # Threaded
+        while not stop.is_set():
+            # Grab a MAVLink message
+            msg = self.conn.recv_match(blocking=True)
+            if not msg:
+                continue
 
+            # Decode MAVLink message and save it to dataset
+            msg_type = msg.get_type()
             if msg_type == "HEARTBEAT":
                 self.last_heartbeat_time = datetime.now()
                 self.data["online"] = True
@@ -64,11 +66,12 @@ class MAVLinkGiver(giver.Giver):
                 self.data["rc_ch7"] = msg.chan7_raw
                 self.data["rc_ch8"] = msg.chan8_raw
 
-        # Invalidate data (set to offline) if heartbeat not received for some time
-        heartbeat_delta = datetime.now() - self.last_heartbeat_time
-        if heartbeat_delta.seconds > HEARTBEAT_WAIT:
-            self.data["online"] = False
+            # Invalidate data (set to offline) if heartbeat not received for some time
+            heartbeat_delta = datetime.now() - self.last_heartbeat_time
+            if heartbeat_delta.seconds > self.HEARTBEAT_WAIT:
+                self.data["online"] = False
 
+    def get_data(self):
         return self.data
 
     def prepare(self):
@@ -86,7 +89,18 @@ class MAVLinkGiver(giver.Giver):
                                           mavutil.mavlink.MAV_DATA_STREAM_ALL,
                                           self.streamrate, 1)
 
+        # Start MAVLink reader/decoder thread
+        self.mav_thread_stop = threading.Event()
+        self.mav_thread = threading.Thread(target=self.mav_read, args=(self.mav_thread_stop,))
+        self.mav_thread.daemon = True
+        self.mav_thread.start()
+
     def cleanup(self):
+        # Stop MAVLink thread gracefully
+        self.mav_thread_stop.set()
+        self.mav_thread.join()
+
+        # Close MAVLink serial connection
         self.conn.close()
 
     def add_arguments(self, parser):
@@ -108,9 +122,6 @@ class MAVLinkGiver(giver.Giver):
             parser.error("argument -r: invalid choice: {} (choose above 0)".format(args.r))
 
         self.device, self.baudrate, self.streamrate = args.d, args.b, args.r
-
-        if args.i > 10:
-            print("Warning! Low interval required for MAVLink to receive data consistently!")
 
 
 giver.run(MAVLinkGiver())
