@@ -3,7 +3,7 @@ var scene = null;
 var camera = null;
 var renderer = null;
 var effect = null;
-
+var position = { x: 0, y: 0, z: 0 };
 var drone_model = null;
 var color = "#009933";  // Default same as graphs
 
@@ -19,10 +19,14 @@ $(function () {
     // Is called when socket receives new data
     var onNewData = function (data) {
         isOnline = data.online;
-        if(isOnline) {
+        if (isOnline) {
             $("#offline_indicator").hide();
 
             // Update graph and cmd line data here
+            position = { x: data.roll, y: data.pitch, z: data.yaw };
+            drone_model.rotation.x = position.x;
+            drone_model.rotation.y = position.y;
+            drone_model.rotation.z = position.z;
         }
         else {
             $("#offline_indicator").show();
@@ -72,7 +76,7 @@ function loadTexture(newColor) {
     if (selectedObject)
         selectedObject.traverse(function (child) {
             if (child instanceof THREE.Mesh) {
-                child.material = new THREE.MeshPhongMaterial({color: color});
+                child.material = new THREE.MeshPhongMaterial({ color: color });
             }
         });
 }
@@ -109,7 +113,7 @@ function setupSelects() {
 function setupGraphs() {
     var data = [
         {
-            x: [0, 1, 2, 3, 4, 5, 6, 7, 8],
+            x: [0, 11, 22, 33, 44, 55, 66, 77, 88],
             y: [0, 1, 2, 3, 4, 5, 6, 7, 8],
             type: 'scatter',
             marker: {
@@ -171,8 +175,8 @@ function setupGraphs() {
             t: 50
         }
     };
-    Plotly.newPlot('tester1', data, layout, {displayModeBar: false});
-    Plotly.newPlot('tester', data, layout, {displayModeBar: false});
+    Plotly.newPlot('tester1', data, layout, { displayModeBar: false });
+    Plotly.newPlot('tester', data, layout, { displayModeBar: false });
 }
 
 // Init three.js
@@ -228,7 +232,7 @@ function setupThree() {
 
     // Create floor
     var floor = new THREE.Mesh(
-        new THREE.BoxGeometry(100, 1, 15), new THREE.MeshLambertMaterial({color: 0x0d0d0d}));
+        new THREE.BoxGeometry(100, 1, 15), new THREE.MeshLambertMaterial({ color: 0x0d0d0d }));
     // All objects need to cast and receive shadows
     floor.castShadow = true;
     floor.receiveShadow = true;
@@ -247,14 +251,11 @@ function setupThree() {
 
     // Change rotation of model correctly
     var update = function () {
-        if(!isOnline) {
-            if(drone_model) {
+        if (!isOnline) {
+            if (drone_model) {
                 drone_model.rotation.x += 0.01;
                 drone_model.rotation.y += 0.01
             }
-        }
-        else {
-            // Update drone model to correct rotation from server HERE
         }
     };
 

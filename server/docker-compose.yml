@@ -1,0 +1,14 @@
+version: '3'
+
+services:
+  web:
+    build: .
+    command: ./docker-entrypoint.sh
+    volumes:
+      - .:/code
+    ports:
+      - "8000:8000"
+  redis:
+    image: redis
+    expose:
+      - "6379"

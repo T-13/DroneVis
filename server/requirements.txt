@@ -1,0 +1,6 @@
+django
+django-mathfilters
+django-bootstrap-static
+django-jquery
+channels
+channels_redis
