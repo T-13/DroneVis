@@ -72,7 +72,6 @@ $(function () {
                 channelsData[0][6] = data["rc_ch6"];
                 channelsData[0][7] = data["rc_ch7"];
                 channelsData[0][8] = data["rc_ch8"];
-                console.log(channelsData);
                 channels.load({
                     columns: channelsData
                 });
@@ -188,8 +187,8 @@ function setupGraphs() {
         },
         axis: {
             y: {
-                    max: 360,
-                    min: 0,
+                    max: -2,
+                    min: 2,
             },
             x: {show:false},
         }
