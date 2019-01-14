@@ -34,13 +34,13 @@ $(function () {
                 // Inverse all for correct rotation of model
                 // Apply X (pitch) and Z (roll) relative to Y (yaw) to allow proper
                 // pitch and roll movement when drone's heading is not directly forward
-                drone_model.rotation.set(-data.pitch, -data.yaw, -data.roll, "YXZ");
+                drone_model.rotation.set(data.pitch, -data.yaw, -data.roll, "YXZ");
             }
 
             // Update graphs
             roll.push(data.roll);
-            yaw.push(data.yaw);
-            pitch.push(data.pitch);
+            yaw.push(data.yaw - Math.PI);
+            pitch.push(-data.pitch);
             // Limit data cached
             if(roll.length > 30)
             {
