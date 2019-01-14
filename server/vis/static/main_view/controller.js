@@ -50,15 +50,15 @@ $(function () {
             // Update text
             var para = document.getElementById("data_text");
             para.innerHTML = "<p>Armed: " + (data.armed ? "Yes" : "No") + "</p>" +
-                             "<p>Heading: " + data.heading + " °</p>" +
-                             "<p>RSSI: " + data.rssi + " %</p>" +
-                             "<p>Load: " + data.load + " %</p>" +
-                             "<p>Battery Voltage: " + data.battery_voltage + " V</p>" +
-                             "<p>Battery Current: " + data.battery_current + " A</p>" +
-                             "<p>Battery Remaining: " + data.battery_remaining + " %</p>" +
-                             "<p>Communication Drop Rate: " + data.comm_drop_rate + " %</p>" +
-                             "<p>Communication Errors: " + data.comm_errors + "</p>" +
-                             "<p>Time since boot: " + data.time_since_boot + " ms</p>"
+                "<p>Heading: " + data.heading + " °</p>" +
+                "<p>RSSI: " + data.rssi + " %</p>" +
+                "<p>Load: " + data.load + " %</p>" +
+                "<p>Battery Voltage: " + data.battery_voltage + " V</p>" +
+                "<p>Battery Current: " + data.battery_current + " A</p>" +
+                "<p>Battery Remaining: " + data.battery_remaining + " %</p>" +
+                "<p>Communication Drop Rate: " + data.comm_drop_rate + " %</p>" +
+                "<p>Communication Errors: " + data.comm_errors + "</p>" +
+                "<p>Time since boot: " + data.time_since_boot + " ms</p>"
         } else {
             $("#offline_indicator").show();
         }
@@ -143,8 +143,8 @@ function setupGraphs() {
             font: {
                 size: 13,
                 color: '#ffffff'
-              }
-          },
+            }
+        },
         paper_bgcolor: '#00000000',
         plot_bgcolor: '#00000000',
         xaxis: {
@@ -317,41 +317,38 @@ function setupThree() {
     var clock = new THREE.Clock(true);
     var options = {
         position: new THREE.Vector3(),
-        positionRandomness: 3,
+        positionRandomness: 1,
         velocity: new THREE.Vector3(),
-        velocityRandomness: 5,
+        velocityRandomness: 2,
         color: 0xaa88ff,
         colorRandomness: 10,
-        turbulence: 1,
-        lifetime: 100,
-        size: 20,
+        turbulence: 0.5,
+        lifetime: 10,
+        size: 10,
         sizeRandomness: 10
     };
     var spawnerOptions = {
-        spawnRate: 1000,
-        horizontalSpeed: 1,
+        spawnRate: 2500,
+        horizontalSpeed: 0.5,
         verticalSpeed: 1,
         timeScale: 0.1
     };
     var particleSystem = new THREE.GPUParticleSystem({
-        maxParticles: 250000
+        maxParticles: 25000
     });
     scene.add(particleSystem);
 
     // Resize correctly
-    renderer.setSize(positionInfo.width - 2, positionInfo.height - 2);
+    renderer.setSize(positionInfo.width/2, positionInfo.height/2);
     container.appendChild(renderer.domElement);
-
-    // Create lights and add to scene
     scene.add(new THREE.AmbientLight(0xffffff, 0.2));
-    // Best light is directional for best effects with less work
     var light = new THREE.DirectionalLight(0xffffff, 0.5);
     light.castShadow = true;
-    light.position.set(0, 10, 0);
-    light.shadow.camera.near = 0.1;
-    light.shadow.camera.far = 1000;
-    light.shadow.mapSize.width = 512;
-    light.shadow.mapSize.height = 512;
+    light.position.set(1, 1, 1);
+    light.shadow.camera.near = 0.4;
+    light.shadow.camera.far = 500;
+    light.shadow.mapSize.width = 256;
+    light.shadow.mapSize.height = 256;
     scene.add(light);
 
     // Create floor
@@ -398,9 +395,9 @@ function setupThree() {
         if (tick < 0) tick = 0;
 
         if (delta > 0) {
-            options.position.x = Math.sin(tick * spawnerOptions.horizontalSpeed) * 10;
-            options.position.y = Math.sin(tick * spawnerOptions.verticalSpeed) * 10;
-            options.position.z = Math.sin(tick * spawnerOptions.horizontalSpeed + spawnerOptions.verticalSpeed) * 2;
+            options.position.x =-5;
+            options.position.y = -10;
+            options.position.z = -10;
 
             for (var x = 0; x < spawnerOptions.spawnRate * delta; x++) {
                 particleSystem.spawnParticle(options);
