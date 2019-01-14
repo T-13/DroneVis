@@ -14,7 +14,6 @@ var isOnline = false;
 $(function () {
     // Construct url to load static files
     source_url = static_url + "main_view/";
-    source_url = static_url + "main_view/";
 
     // Is called when socket receives new data
     var onNewData = function (data) {
