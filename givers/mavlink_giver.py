@@ -2,6 +2,7 @@ import sys
 
 import giver
 
+import math
 import threading
 from pymavlink import mavutil
 from datetime import datetime
@@ -60,8 +61,8 @@ class MAVLinkGiver(giver.Giver):
             if msg_type == "ATTITUDE":
                 self.data["time_since_boot"] = msg.time_boot_ms
                 self.data["roll"] = msg.roll
-                self.data["pitch"] = msg.pitch
-                self.data["yaw"] = msg.yaw
+                self.data["pitch"] = -msg.pitch
+                self.data["yaw"] = msg.yaw - math.pi  # yaw comes in [0, 360], convert to [-180, 180]
             if msg_type == "VFR_HUD":
                 self.data["heading"] = msg.heading
                 self.data["throttle"] = msg.throttle

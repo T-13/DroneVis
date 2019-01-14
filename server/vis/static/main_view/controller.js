@@ -31,10 +31,10 @@ $(function () {
 
             // Update model
             if (drone_model) {
-                // Inverse yaw and roll for correct rotation
+                // Inverse all for correct rotation of model
                 // Apply X (pitch) and Z (roll) relative to Y (yaw) to allow proper
                 // pitch and roll movement when drone's heading is not directly forward
-                drone_model.rotation.set(data.pitch, -data.yaw, -data.roll, "YXZ");
+                drone_model.rotation.set(-data.pitch, -data.yaw, -data.roll, "YXZ");
             }
 
             // Update graphs
@@ -189,8 +189,8 @@ function setupGraphs() {
         },
         axis: {
             y: {
-                    max: -2,
-                    min: 2,
+                    max: 3.15,
+                    min: -3.15,
             },
             x: {show:false},
         }
