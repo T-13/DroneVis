@@ -23,7 +23,10 @@ $(function () {
             $("#offline_indicator").hide();
 
             // Update model
-            drone_model.rotation.set(data.pitch, -data.yaw, -data.roll);
+            // Inverse yaw and roll for correct rotation
+            // Apply X (pitch) and Z (roll) relative to Y (yaw) to allow proper
+            // pitch and roll movement when drone's heading is not directly forward
+            drone_model.rotation.set(data.pitch, -data.yaw, -data.roll, "YXZ");
 
             // Update graphs
             var update = { x: [[++xPlot], [++xPlot], [++xPlot]], y: [[data.pitch], [data.yaw], [data.roll]] };
