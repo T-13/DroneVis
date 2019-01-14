@@ -21,6 +21,7 @@ class MAVLinkGiver(giver.Giver):
         self.data = {
             "online": False,
             "armed": False,
+            "time_since_boot": 0,
             "roll": 0.0,
             "pitch": 0.0,
             "yaw": 0.0,
@@ -34,6 +35,13 @@ class MAVLinkGiver(giver.Giver):
             "rc_ch6": 0,
             "rc_ch7": 0,
             "rc_ch8": 0,
+            "rssi": 0,
+            "load": 0.0,
+            "battery_voltage": 0.0,
+            "battery_current": 0.0,
+            "battery_remaining": 0.0,
+            "comm_drop_rate": 0,
+            "comm_errors": 0,
         }
 
     def mav_read(self, stop):  # Threaded
@@ -50,6 +58,7 @@ class MAVLinkGiver(giver.Giver):
                 self.data["online"] = True
                 self.data["armed"] = (msg.base_mode & mavutil.mavlink.MAV_MODE_FLAG_SAFETY_ARMED)
             if msg_type == "ATTITUDE":
+                self.data["time_since_boot"] = msg.time_boot_ms
                 self.data["roll"] = msg.roll
                 self.data["pitch"] = msg.pitch
                 self.data["yaw"] = msg.yaw
@@ -65,6 +74,15 @@ class MAVLinkGiver(giver.Giver):
                 self.data["rc_ch6"] = msg.chan6_raw
                 self.data["rc_ch7"] = msg.chan7_raw
                 self.data["rc_ch8"] = msg.chan8_raw
+                self.data["rssi"] = msg.rssi
+            if msg_type == "SYS_STATUS":
+                self.data["load"] = msg.load / 10.0
+                self.data["battery_voltage"] = msg.voltage_battery / 1000.0
+                self.data["battery_current"] = msg.current_battery / 100.0
+                self.data["battery_remaining"] = msg.battery_remaining
+                self.data["drop_rate_comm"] = msg.drop_rate_comm
+                self.data["errors_comm"] = msg.errors_comm
+
 
             # Invalidate data (set to offline) if heartbeat not received for some time
             heartbeat_delta = datetime.now() - self.last_heartbeat_time

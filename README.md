@@ -7,11 +7,20 @@ This repository contains everything required to set up the software visualizatio
 
 ### Features
 
-- Drone Rotation Visualization
+- 3D Rotation Visualization
   - Model Selection
   - Object Color Selection
 - Graph Visualization
-  - Pitch, Roll, Yaw, ...
+  - Attitude (Pitch, Roll, Yaw)
+  - RC Channels (up to 8)
+  - Arm Status
+  - Heading
+  - Throttle
+  - RSSI (Receive Signal Strength Indicator)
+  - Load
+  - Battery (Voltage, Current, Remaining)
+  - Communication Link (Drop Rate, Error Count)
+  - Time Since Boot
 - Giver applications
   - MAVLink decoder
 
