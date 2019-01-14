@@ -15,9 +15,9 @@
 
     <!-- Quick select improvement -->
     <!-- Latest compiled and minified CSS -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.2/css/bootstrap-select.min.css">
+    <link rel="stylesheet" type="text/css" href="{% static 'bootstrap_select.js/bootstrap-select.min.css' %}">
     <!-- Latest compiled and minified JavaScript -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.13.2/js/bootstrap-select.min.js"></script>
+    <script src="{% static 'bootstrap_select.js/bootstrap-select.min.js' %}"></script>
 
     <!-- three.js for 3D visualization -->
     <script src="{% static 'three.js/three.js' %}"></script>
@@ -25,8 +25,12 @@
     <script src="{% static 'three.js/ObjectLoader.js' %}"></script>
     <script src="{% static 'three.js/AnaglyphEffect.js' %}"></script>
     <script src="{% static 'three.js/GPUParticleSystem.js' %}"></script>
-    <!-- plotly for graph visualization -->
-    <script src="{% static 'plotly.js/plotly.js' %}"></script>
+    <!-- c3 for graph visualization -->
+    <!-- Load c3.css -->
+    <link rel="stylesheet" type="text/css" href="{% static 'c3.js/c3.min.css' %}">
+    <!-- Load d3.js and c3.js -->
+    <script src="{% static 'c3.js/d3.min.js' %}"></script>
+    <script src="{% static 'c3.js/c3.min.js' %}"></script>
 
     <!-- FONT -->
     <link rel="stylesheet" type="text/css" href="//fonts.googleapis.com/css?family=Ubuntu" />
@@ -57,7 +61,7 @@
         </select>
         <label for="texture_select" style="margin-right: 10px; margin-left: 20px">Select texture:
         </label>
-        <input id="texture_select" type="color" value="#009933" autocomplete="off"/>
+        <input id="texture_select" type="color" value="#ffffff" autocomplete="off"/>
     </nav>
 
     <div id="offline_indicator">

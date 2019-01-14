@@ -4,12 +4,19 @@ var camera = null;
 var renderer = null;
 var effect = null;
 var drone_model = null;
-var color = "#009933";  // Default same as graphs
-var layout1;
-var layout2;
-var xPlot = 0;
+var color = "#ffffff";  // Default white for best visibility
+
 var source_url = "";
 var isOnline = false;
+
+var rollPitchYaw = null;
+var roll = ['roll', 0];
+var pitch = ['pitch', 0];
+var yaw = ['yaw', 0];
+var channels = null;
+var channelsData = [
+    ['channel', 1500, 1500, 1500, 1500, 1500, 1500, 1500, 1500]];
+var updates_since_draw = 0;
 
 $(function () {
     // Construct url to load static files
@@ -28,28 +35,50 @@ $(function () {
             drone_model.rotation.set(data.pitch, -data.yaw, -data.roll, "YXZ");
 
             // Update graphs
-            var update = { x: [[++xPlot], [++xPlot], [++xPlot]], y: [[data.pitch], [data.yaw], [data.roll]] };
-            if (data.pitch != null || data.yaw != null || data.roll != null) {
-                Plotly.extendTraces('graph_attitude', update, [0, 1, 2], 10);
-            }
-            var trace1 = {
-                type: 'bar',
-                x: [1, 2, 3, 4, 5, 6, 7, 8],
-                y: [data.rc_ch1, data.rc_ch2, data.rc_ch3, data.rc_ch4, data.rc_ch5, data.rc_ch6, data.rc_ch7, data.rc_ch8],
-                marker: {
-                    color: '#009933',
-                    line: {
-                        width: 2.5
-                    }
-                }
-            };
+            roll.push(data.roll);
+            yaw.push(data.yaw);
+            pitch.push(data.pitch);
+            // Limit data cached
+            if(roll.length > 30)
+            {
+                roll.splice(0, 1);
+                yaw.splice(0, 1);
+                pitch.splice(0, 1);
+                roll[0] = "roll";
+                pitch[0] = "pitch";
+                yaw[0] = "yaw";
 
-            var dataGraph = [trace1];
-            Plotly.newPlot('graph_rc_channels', dataGraph, layout2, { responsive: true });
+            }
+            if(updates_since_draw > 10)
+            {
+                rollPitchYaw.load({
+                columns: [
+                    roll,
+                    pitch,
+                    yaw
+                ]
+                });
+                updates_since_draw = 0;
+            }
+            ++updates_since_draw;
+
+            channelsData[0][1] = data["rc_ch1"];
+            channelsData[0][2] = data["rc_ch2"];
+            channelsData[0][3] = data["rc_ch3"];
+            channelsData[0][4] = data["rc_ch4"];
+            channelsData[0][5] = data["rc_ch5"];
+            channelsData[0][6] = data["rc_ch6"];
+            channelsData[0][7] = data["rc_ch7"];
+            channelsData[0][8] = data["rc_ch8"];
+            console.log(channelsData);
+            channels.load({
+                columns: channelsData
+            });
 
             // Update text
             var para = document.getElementById("data_text");
-            para.innerHTML = "<p>Armed: " + (data.armed ? "Yes" : "No") + "</p>" +
+            para.innerHTML =
+                "<p>Armed: " + (data.armed ? "Yes" : "No") + "</p>" +
                 "<p>Heading: " + data.heading + " °</p>" +
                 "<p>RSSI: " + data.rssi + " %</p>" +
                 "<p>Load: " + data.load + " %</p>" +
@@ -138,169 +167,59 @@ function setupSelects() {
 }
 // Init graphs
 function setupGraphs() {
-    layout1 = {
-        legend: {
-            font: {
-                size: 13,
-                color: '#ffffff'
-            }
+    rollPitchYaw = c3.generate({
+        bindto: "#graph_attitude",
+        data: {
+            columns: [
+                roll,
+                pitch,
+                yaw
+            ]
         },
-        paper_bgcolor: '#00000000',
-        plot_bgcolor: '#00000000',
-        xaxis: {
-            showgrid: true,
-            mirror: 'ticks',
-            tickfont: {
-                color: 'snow'
+        padding: {
+            top: 10,
+            left: 40,
+            bottom: 5,
+            right: 10
+        },
+        axis: {
+            y: {
+                    max: 360,
+                    min: 0,
             },
-            gridcolor: 'snow',
-            zerolinecolor: 'snow',
-            gridwidth: 1,
-            title: {
-                text: 'Time',
-                font: {
-                    color: 'snow',
-                    size: 16
-                }
-            }
-        },
-        yaxis: {
-            showgrid: true,
-            mirror: 'ticks',
-            tickfont: {
-                color: 'snow'
-            },
-            gridcolor: 'snow',
-            zerolinecolor: 'snow',
-            gridwidth: 2,
-            title: {
-                text: 'Angle',
-                font: {
-                    color: 'snow',
-                    size: 16
-                }
-            }
-        },
-        title: {
-            text: 'Attitude',
-            font: {
-                color: '#ffffff',
-                size: 16
-            }
-        },
-        margin: {
-            l: 50,
-            r: 25,
-            b: 50,
-            t: 50
+            x: {show:false},
         }
-    };
-    layout2 = {
-        paper_bgcolor: '#00000000',
-        plot_bgcolor: '#00000000',
-        xaxis: {
-            showgrid: true,
-            mirror: 'ticks',
-            tickfont: {
-                color: 'snow'
-            },
-            gridcolor: 'snow',
-            zerolinecolor: 'snow',
-            gridwidth: 1,
-            title: {
-                text: 'Channel',
-                font: {
-                    color: 'snow',
-                    size: 16
-                }
-            }
+    });
+
+    channels = c3.generate({
+        bindto: "#graph_rc_channels",
+        data: {
+            columns: channelsData,
+            type: 'bar'
         },
-        yaxis: {
-            showgrid: true,
-            mirror: 'ticks',
-            tickfont: {
-                color: 'snow'
+        bar: {
+            width: {
+                ratio: 0.8
             },
-            gridcolor: 'snow',
-            zerolinecolor: 'snow',
-            gridwidth: 2,
-            title: {
-                text: 'Value',
-                font: {
-                    color: 'snow',
-                    size: 16
-                }
+        },
+        padding: {
+            top: 10,
+            left: 40,
+            bottom: 5,
+            right: 10
+        },
+        axis: {
+            y: {
+                    max: 3000,
+                    min: 0,
             },
-            range: [1000, 2000]
+            x: {show:false},
         },
-        title: {
-            text: 'RC Channels',
-            font: {
-                color: '#ffffff',
-                size: 16
-            }
-        },
-        margin: {
-            l: 50,
-            r: 25,
-            b: 50,
-            t: 50
+        color: {
+            pattern: ["#009933"]
         }
-    };
-    Plotly.newPlot('graph_attitude', [
-        {
-            x: [0],
-            y: [0],
-            type: 'scatter',
-            name: 'Pitch',
-            marker: {
-                color: '#009933',
-                line: {
-                    width: 2.5
-                }
-            }
-        },
-        {
-            x: [0],
-            y: [0],
-            type: 'scatter',
-            name: 'Yaw',
-            marker: {
-                color: '#3366ff',
-                line: {
-                    width: 2.5
-                }
-            }
-        },
-        {
-            x: [0],
-            y: [0],
-            type: 'scatter',
-            name: 'Roll',
-            marker: {
-                color: '#ff0000',
-                line: {
-                    width: 2.5
-                }
-            }
-        }], layout1, { displayModeBar: false });
+    });
 
-    var trace1 = {
-        type: 'bar',
-        x: [1, 2, 3, 4, 5, 6, 7, 8],
-        y: [1, 11, 12, 13, 14, 15, 14, 13],
-        marker: {
-            color: '#009933',
-            line: {
-                width: 2.5
-            }
-        }
-    };
-
-    var data = [trace1];
-
-
-    Plotly.newPlot('graph_rc_channels', data, layout2, { responsive: true });
 }
 
 // Init three.js
@@ -353,7 +272,7 @@ function setupThree() {
 
     // Create floor
     var floor = new THREE.Mesh(
-        new THREE.BoxGeometry(100, 1, 15), new THREE.MeshLambertMaterial({ color: 0x0d0d0d }));
+        new THREE.BoxGeometry(100, 1, 15), new THREE.MeshLambertMaterial({ color: 0x009933 }));
     // All objects need to cast and receive shadows
     floor.castShadow = true;
     floor.receiveShadow = true;
@@ -418,5 +337,5 @@ function updateThree() {
     var container = document.getElementById('canvas');
     var positionInfo = container.getBoundingClientRect();
     renderer.setSize(positionInfo.width - 2, positionInfo.height - 2);
-    effect.setSize(container.offsetWidth, container.offsetHeight);
+    effect.setSize(container.offsetWidth -2, container.offsetHeight - 2);
 }

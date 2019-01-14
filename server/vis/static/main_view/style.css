@@ -21,7 +21,6 @@ body
 p{
     color: snow;
     font-style: initial;
-    font-size:larger;
 }
 .text{
     padding: 5px;
@@ -50,6 +49,7 @@ p{
     padding-right: 20vh;
     background: #000000AA;
     color: snow;
+    border-bottom: 1px solid snow;
 }
 
 #texture_select
@@ -87,4 +87,20 @@ p{
     margin: auto;
 
     padding: 0;
+}
+
+.c3 .c3-axis-x path, .c3 .c3-axis-x line {
+    stroke: snow;
+}
+.c3 .c3-axis-y path, .c3 .c3-axis-y line {
+    stroke: snow;
+}
+
+.c3-axis-y text {
+   fill: snow;
+   font-size:12px;
+}
+.c3 text {
+    font-size:12px;
+    fill: snow;
 }
