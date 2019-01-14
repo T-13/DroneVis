@@ -43,6 +43,8 @@ All gives are named `type_giver.py` and can be executed directly, in the backgro
 - Run `$ docker-compose build` to build the Docker image
 - Run `$ docker-compose up` to run the image
 
+Docker automatically loads `vis/fixtures/initial_data.json` fixture with 3 models and test admin account (`admin:admin`, accessible from `/admin`).
+
 ### Manual
 
 #### Ubuntu (18.0.4)
