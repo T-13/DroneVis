@@ -215,8 +215,8 @@ function setupGraphs() {
         },
         axis: {
             y: {
-                    max: 3000,
-                    min: 0,
+                    max: 2000,
+                    min: 1000,
             },
             x: {show:false},
         },
