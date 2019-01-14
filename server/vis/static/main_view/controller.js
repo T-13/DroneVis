@@ -16,7 +16,8 @@ var yaw = ['yaw', 0];
 var channels = null;
 var channelsData = [
     ['channel', 1500, 1500, 1500, 1500, 1500, 1500, 1500, 1500]];
-var updates_since_draw = 0;
+var lastAttitudeUpdate = new Date().getTime();
+var lastChannelUpdate = lastAttitudeUpdate;
 
 $(function () {
     // Construct url to load static files
@@ -49,7 +50,8 @@ $(function () {
                 yaw[0] = "yaw";
 
             }
-            if(updates_since_draw > 10)
+            var now = new Date().getTime();
+            if(now - lastAttitudeUpdate >= 500)
             {
                 rollPitchYaw.load({
                 columns: [
@@ -58,22 +60,24 @@ $(function () {
                     yaw
                 ]
                 });
-                updates_since_draw = 0;
+                lastAttitudeUpdate = now;
             }
-            ++updates_since_draw;
 
-            channelsData[0][1] = data["rc_ch1"];
-            channelsData[0][2] = data["rc_ch2"];
-            channelsData[0][3] = data["rc_ch3"];
-            channelsData[0][4] = data["rc_ch4"];
-            channelsData[0][5] = data["rc_ch5"];
-            channelsData[0][6] = data["rc_ch6"];
-            channelsData[0][7] = data["rc_ch7"];
-            channelsData[0][8] = data["rc_ch8"];
-            console.log(channelsData);
-            channels.load({
-                columns: channelsData
-            });
+            if(now - lastChannelUpdate >= 400) {
+                channelsData[0][1] = data["rc_ch1"];
+                channelsData[0][2] = data["rc_ch2"];
+                channelsData[0][3] = data["rc_ch3"];
+                channelsData[0][4] = data["rc_ch4"];
+                channelsData[0][5] = data["rc_ch5"];
+                channelsData[0][6] = data["rc_ch6"];
+                channelsData[0][7] = data["rc_ch7"];
+                channelsData[0][8] = data["rc_ch8"];
+                console.log(channelsData);
+                channels.load({
+                    columns: channelsData
+                });
+                lastChannelUpdate = now;
+            }
 
             // Update text
             var para = document.getElementById("data_text");
