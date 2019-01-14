@@ -93,6 +93,7 @@ function loadModel(obj) {
 
     // Add to scene, set position and load correct texture
     drone_model.position.set(0, 0, 0);
+    //drone_model.layers.enable(1);
     scene.add(drone_model);
     loadTexture(color)
 }
@@ -308,6 +309,8 @@ function setupThree() {
     // Create three.js scene and all needed objects
     scene = new THREE.Scene();
     camera = new THREE.PerspectiveCamera(75, 1, 0.1, 1000);
+    //camera.position.set(-1, 0, -1);
+    camera.layers.enable(1);
     scene.background = new THREE.Color(0x000000);
     camera.position.z = 10;
     renderer = new THREE.WebGLRenderer();
@@ -370,6 +373,27 @@ function setupThree() {
     effect = new THREE.AnaglyphEffect(renderer);
     effect.setSize(container.offsetWidth - 2, container.offsetHeight - 2);
 
+    renderScene = new THREE.RenderPass( scene, camera )
+	
+    effectFXAA = new THREE.ShaderPass( THREE.FXAAShader )
+    effectFXAA.uniforms.resolution.value.set( 1 / window.innerWidth, 1 / window.innerHeight )
+        
+    bloomPass = new THREE.UnrealBloomPass( new THREE.Vector2( window.innerWidth, window.innerHeight ), 1.5, 0.4, 0.85 )
+    bloomPass.threshold = 0.21
+    bloomPass.strength = 1.2
+    bloomPass.radius = 1
+    bloomPass.renderToScreen = true
+        
+    composer = new THREE.EffectComposer( renderer )
+    composer.setSize( window.innerWidth, window.innerHeight )
+        
+    composer.addPass( renderScene )
+    composer.addPass( effectFXAA )
+    composer.addPass( bloomPass )
+        
+    renderer.gammaInput = true
+    renderer.gammaOutput = true
+    renderer.toneMappingExposure = Math.pow( 0.9, 4.0 ) 
     // Rotate model slowly when data feed is disconnected
     var update = function () {
         if (!isOnline) {
@@ -382,6 +406,15 @@ function setupThree() {
 
     //draw scene with effect
     var render = function () {
+        //effect.render(scene, camera);
+        renderer.autoClear = false;
+        renderer.clear();
+        
+        camera.layers.set(1);
+        composer.render();
+        
+        renderer.clearDepth();
+        camera.layers.set(0);
         effect.render(scene, camera);
     };
 
