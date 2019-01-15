@@ -9,5 +9,5 @@ def get_model(request, model):
         return JsonResponse(response_json(STATUSES["OK"], mesh.value))
     except Exception as e:
         print(e)
-        return JsonResponse(response_json(STATUSES["ERROR_LOGIN_FAILED"]))
+        return JsonResponse(response_json(STATUSES["ERROR_RETRIEVING_DATA"]))
 
