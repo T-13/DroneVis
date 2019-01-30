@@ -3,7 +3,7 @@ version: '3'
 services:
   web:
     build: .
-    command: ./docker-entrypoint.sh
+    command: ./docker-entrypoint.sh "${PORT}"
     tty: true
     volumes:
       - .:/code
