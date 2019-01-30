@@ -25,7 +25,7 @@ SECRET_KEY = ')czrnbn9q%2h#rneiy6ga3^jskwk@0&q#i0618x)gf+mr!(2-8'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]', '0.0.0.0']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]', '0.0.0.0', 'dronevis.herokuapp.com']
 
 
 # Application definition
