@@ -16,7 +16,8 @@ function WebActionController() {
     };
 
     var setupWebSocket = function (updateFunction) {
-        var link = 'ws://' + window.location.host + '/socket/0/';
+        var ws_scheme = window.location.protocol == "https:" ? "wss" : "ws";
+        var link = ws_scheme + '://' + window.location.host + '/socket/0/';
         socket = new WebSocket(link);
         console.log("Socket connecting to " + link);
 
