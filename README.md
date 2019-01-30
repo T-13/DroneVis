@@ -1,5 +1,7 @@
 # DroneVis
 
+[![Heroku](https://heroku-badge.herokuapp.com/?app=dronevis&style=flat)](https://dronevis.herokuapp.com/)
+
 Drone telemetry visualization project at FERI. Contains final project product, usable for remote telemetry viewing of any drone data (MAVLink currently supported). Certain tasks from [T-13/DroneTasks](https://github.com/T-13/DroneTasks) were merged and included.
 
 This repository contains everything required to set up the software visualization. Refer to the [wiki](https://github.com/T-13/DroneVis/wiki) for detailed documentation on flight firmware, hardware components, wiring and getting data to DroneVis.
