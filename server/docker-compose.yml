@@ -3,12 +3,12 @@ version: '3'
 services:
   web:
     build: .
-    command: ./docker-entrypoint.sh "${PORT}"
+    command: ./docker-entrypoint.sh "${PORT:-8000}"
     tty: true
     volumes:
       - .:/code
     ports:
-      - "${PORT}:8000"
+      - "${PORT:-8000}:8000"
   redis:
     image: redis
     expose:
