@@ -29,10 +29,11 @@ $(function () {
         if (isOnline) {
             $("#offline_indicator").hide();
 
-            // Update graphs
+            // Update attitude data
             roll.push(data.roll);
             yaw.push(data.yaw - Math.PI);
             pitch.push(-data.pitch);
+
             // Limit data cached
             if(roll.length > 30)
             {
@@ -295,23 +296,27 @@ function setupThree() {
         else{
             // Update model
             if (drone_model) {
+                var cur_pitch = -pitch[pitch.length - 1];
+                var cur_yaw = yaw[pitch.length - 1] + Math.PI;
+                var cur_roll = roll[pitch.length - 1];
+
                 if($("#should_smooth").is(':checked')) {
                     var drone_pitch = drone_model.rotation._x;
                     var drone_yaw = drone_model.rotation._y;
                     var drone_roll = drone_model.rotation._z;
 
                     // Transition in steps - smooth packet loss
-                    var pitch_dif = (drone_pitch - pitch[pitch.length - 1]) / 50;
-                    var yaw_dif = (drone_yaw - yaw[pitch.length - 1]) / 50;
-                    var roll_dif = (drone_roll - roll[pitch.length - 1]) / 50;
+                    var pitch_dif = (drone_pitch - cur_pitch) / 12.5;
+                    var yaw_dif = (drone_yaw - -cur_yaw) / 12.5;
+                    var roll_dif = (drone_roll - -cur_roll) / 12.5;
 
                     // Inverse all for correct rotation of model
                     // Apply X (pitch) and Z (roll) relative to Y (yaw) to allow proper
                     // pitch and roll movement when drone's heading is not directly forward
-                    drone_model.rotation.set(drone_pitch - pitch_dif, yaw_dif - drone_yaw, roll_dif - drone_roll, "YXZ");
+                    drone_model.rotation.set(drone_pitch - pitch_dif, drone_yaw - yaw_dif, drone_roll - roll_dif, "YXZ");
                 }
                 else{
-                    drone_model.rotation.set(pitch[pitch.length - 1], -yaw[pitch.length - 1], -roll[pitch.length - 1], "YXZ");
+                    drone_model.rotation.set(cur_pitch, -cur_yaw, -cur_roll, "YXZ");
                 }
             }
         }
