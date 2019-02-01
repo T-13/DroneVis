@@ -59,9 +59,15 @@
               </option>
           {% endfor %}
         </select>
-        <label for="texture_select" style="margin-right: 10px; margin-left: 20px">Select texture:
+        <label for="texture_select" style="margin-right: 10px; margin-left: 20px; cursor: pointer;">Select texture:
         </label>
         <input id="texture_select" type="color" value="#ffffff" autocomplete="off"/>
+
+        <label for="should_smooth" style="margin-left: 20px; cursor: pointer;">Smooth animation:&nbsp&nbsp</label>
+        <label class="check_container">
+          <input type="checkbox" id="should_smooth" autocomplete="off" checked>
+          <span class="checkmark"></span>
+        </label>
     </nav>
 
     <div id="offline_indicator">

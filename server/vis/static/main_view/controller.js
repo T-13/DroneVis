@@ -29,14 +29,6 @@ $(function () {
         if (isOnline) {
             $("#offline_indicator").hide();
 
-            // Update model
-            if (drone_model) {
-                // Inverse all for correct rotation of model
-                // Apply X (pitch) and Z (roll) relative to Y (yaw) to allow proper
-                // pitch and roll movement when drone's heading is not directly forward
-                drone_model.rotation.set(data.pitch, -data.yaw, -data.roll, "YXZ");
-            }
-
             // Update graphs
             roll.push(data.roll);
             yaw.push(data.yaw - Math.PI);
@@ -62,7 +54,7 @@ $(function () {
                     yaw
                 ]
                 });
-                lastAttitudeUpdate = now;
+                lastAttitudeUpdate += 500; // Instead of now, this helps with frequencies bigger then 500.
             }
 
             if(now - lastChannelUpdate >= 400) {
@@ -240,10 +232,10 @@ function setupThree() {
     var tick = 0;
     var clock = new THREE.Clock(true);
     var options = {
-        position: new THREE.Vector3(),
-        positionRandomness: 1,
-        velocity: new THREE.Vector3(),
-        velocityRandomness: 2,
+        position: new THREE.Vector3(-120,50,-100),
+        positionRandomness: 10,
+        velocity: new THREE.Vector3(0,0,0),
+        velocityRandomness: 200,
         color: 0xaa88ff,
         colorRandomness: 10,
         turbulence: 0.5,
@@ -253,12 +245,10 @@ function setupThree() {
     };
     var spawnerOptions = {
         spawnRate: 2500,
-        horizontalSpeed: 0.5,
-        verticalSpeed: 1,
         timeScale: 0.1
     };
     var particleSystem = new THREE.GPUParticleSystem({
-        maxParticles: 25000
+        maxParticles: 20000
     });
     scene.add(particleSystem);
 
@@ -277,7 +267,7 @@ function setupThree() {
 
     // Create floor
     var floor = new THREE.Mesh(
-        new THREE.BoxGeometry(100, 1, 15), new THREE.MeshLambertMaterial({ color: 0x009933 }));
+        new THREE.BoxGeometry(100, 1, 50), new THREE.MeshLambertMaterial({ color: 0x009933 }));
     // All objects need to cast and receive shadows
     floor.castShadow = true;
     floor.receiveShadow = true;
@@ -302,6 +292,29 @@ function setupThree() {
                 drone_model.rotation.y += 0.01
             }
         }
+        else{
+            // Update model
+            if (drone_model) {
+                if($("#should_smooth").is(':checked')) {
+                    var drone_pitch = drone_model.rotation._x;
+                    var drone_yaw = drone_model.rotation._y;
+                    var drone_roll = drone_model.rotation._z;
+
+                    // Transition in steps - smooth packet loss
+                    var pitch_dif = (drone_pitch - pitch[pitch.length - 1]) / 50;
+                    var yaw_dif = (drone_yaw - yaw[pitch.length - 1]) / 50;
+                    var roll_dif = (drone_roll - roll[pitch.length - 1]) / 50;
+
+                    // Inverse all for correct rotation of model
+                    // Apply X (pitch) and Z (roll) relative to Y (yaw) to allow proper
+                    // pitch and roll movement when drone's heading is not directly forward
+                    drone_model.rotation.set(drone_pitch - pitch_dif, drone_yaw - yaw_dif, drone_roll - roll_dif, "YXZ");
+                }
+                else{
+                    drone_model.rotation.set(pitch[pitch.length - 1], yaw[pitch.length - 1], roll[pitch.length - 1], "YXZ");
+                }
+            }
+        }
     };
 
     //draw scene with effect
@@ -319,10 +332,6 @@ function setupThree() {
         if (tick < 0) tick = 0;
 
         if (delta > 0) {
-            options.position.x =-5;
-            options.position.y = -10;
-            options.position.z = -10;
-
             for (var x = 0; x < spawnerOptions.spawnRate * delta; x++) {
                 particleSystem.spawnParticle(options);
             }
