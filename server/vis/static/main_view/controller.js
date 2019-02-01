@@ -308,10 +308,10 @@ function setupThree() {
                     // Inverse all for correct rotation of model
                     // Apply X (pitch) and Z (roll) relative to Y (yaw) to allow proper
                     // pitch and roll movement when drone's heading is not directly forward
-                    drone_model.rotation.set(drone_pitch - pitch_dif, drone_yaw - yaw_dif, drone_roll - roll_dif, "YXZ");
+                    drone_model.rotation.set(drone_pitch - pitch_dif, yaw_dif - drone_yaw, roll_dif - drone_roll, "YXZ");
                 }
                 else{
-                    drone_model.rotation.set(pitch[pitch.length - 1], yaw[pitch.length - 1], roll[pitch.length - 1], "YXZ");
+                    drone_model.rotation.set(pitch[pitch.length - 1], -yaw[pitch.length - 1], -roll[pitch.length - 1], "YXZ");
                 }
             }
         }
