@@ -6,6 +6,7 @@ Drone telemetry visualization project at FERI. Contains final project product, u
 
 This repository contains everything required to set up the software visualization. Refer to the [wiki](https://github.com/T-13/DroneVis/wiki) for detailed documentation on flight firmware, hardware components, wiring and getting data to DroneVis.
 
+[![Demo](http://img.youtube.com/vi/YO1T26IBSWk/0.jpg)](https://www.youtube.com/watch?v=YO1T26IBSWk "DroneVis")
 
 ### Features
 
