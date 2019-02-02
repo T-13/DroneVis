@@ -10,7 +10,7 @@ from datetime import datetime
 
 # MAVLink data giver
 class MAVLinkGiver(giver.Giver):
-    HEARTBEAT_WAIT = 1
+    HEARTBEAT_WAIT = 1  # Seconds
 
     def __init__(self):
         self.device = None
@@ -48,47 +48,47 @@ class MAVLinkGiver(giver.Giver):
     def mav_read(self, stop):  # Threaded
         while not stop.is_set():
             # Grab a MAVLink message
-            msg = self.conn.recv_match(blocking=True)
-            if not msg:
-                continue
-
-            # Decode MAVLink message and save it to dataset
-            msg_type = msg.get_type()
-            if msg_type == "HEARTBEAT":
-                self.last_heartbeat_time = datetime.now()
-                self.data["online"] = True
-                self.data["armed"] = (msg.base_mode & mavutil.mavlink.MAV_MODE_FLAG_SAFETY_ARMED)
-            if msg_type == "ATTITUDE":
-                self.data["time_since_boot"] = msg.time_boot_ms
-                self.data["roll"] = msg.roll
-                self.data["pitch"] = msg.pitch
-                self.data["yaw"] = msg.yaw
-            if msg_type == "VFR_HUD":
-                self.data["heading"] = msg.heading
-                self.data["throttle"] = msg.throttle
-            if msg_type == "RC_CHANNELS_RAW":
-                self.data["rc_ch1"] = msg.chan1_raw
-                self.data["rc_ch2"] = msg.chan2_raw
-                self.data["rc_ch3"] = msg.chan3_raw
-                self.data["rc_ch4"] = msg.chan4_raw
-                self.data["rc_ch5"] = msg.chan5_raw
-                self.data["rc_ch6"] = msg.chan6_raw
-                self.data["rc_ch7"] = msg.chan7_raw
-                self.data["rc_ch8"] = msg.chan8_raw
-                self.data["rssi"] = msg.rssi
-            if msg_type == "SYS_STATUS":
-                self.data["load"] = msg.load / 10.0
-                self.data["battery_voltage"] = msg.voltage_battery / 1000.0
-                self.data["battery_current"] = msg.current_battery / 100.0
-                self.data["battery_remaining"] = msg.battery_remaining
-                self.data["drop_rate_comm"] = msg.drop_rate_comm
-                self.data["errors_comm"] = msg.errors_comm
-
+            msg = self.conn.recv_match(blocking=False)
+            if msg:
+                self.mav_decode(msg)
 
             # Invalidate data (set to offline) if heartbeat not received for some time
             heartbeat_delta = datetime.now() - self.last_heartbeat_time
             if heartbeat_delta.seconds > self.HEARTBEAT_WAIT:
                 self.data["online"] = False
+
+    def mav_decode(self, msg):
+        # Decode MAVLink message and save it to dataset
+        msg_type = msg.get_type()
+        if msg_type == "HEARTBEAT":
+            self.last_heartbeat_time = datetime.now()
+            self.data["online"] = True
+            self.data["armed"] = (msg.base_mode & mavutil.mavlink.MAV_MODE_FLAG_SAFETY_ARMED)
+        if msg_type == "ATTITUDE":
+            self.data["time_since_boot"] = msg.time_boot_ms
+            self.data["roll"] = msg.roll
+            self.data["pitch"] = msg.pitch
+            self.data["yaw"] = msg.yaw
+        if msg_type == "VFR_HUD":
+            self.data["heading"] = msg.heading
+            self.data["throttle"] = msg.throttle
+        if msg_type == "RC_CHANNELS_RAW":
+            self.data["rc_ch1"] = msg.chan1_raw
+            self.data["rc_ch2"] = msg.chan2_raw
+            self.data["rc_ch3"] = msg.chan3_raw
+            self.data["rc_ch4"] = msg.chan4_raw
+            self.data["rc_ch5"] = msg.chan5_raw
+            self.data["rc_ch6"] = msg.chan6_raw
+            self.data["rc_ch7"] = msg.chan7_raw
+            self.data["rc_ch8"] = msg.chan8_raw
+            self.data["rssi"] = msg.rssi
+        if msg_type == "SYS_STATUS":
+            self.data["load"] = msg.load / 10.0
+            self.data["battery_voltage"] = msg.voltage_battery / 1000.0
+            self.data["battery_current"] = msg.current_battery / 100.0
+            self.data["battery_remaining"] = msg.battery_remaining
+            self.data["drop_rate_comm"] = msg.drop_rate_comm
+            self.data["errors_comm"] = msg.errors_comm
 
     def get_data(self):
         return self.data
