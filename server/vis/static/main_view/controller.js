@@ -78,7 +78,7 @@ $(function () {
             para.innerHTML =
                 "<p>Armed: " + (data.armed ? "Yes" : "No") + "</p>" +
                 "<p>Heading: " + data.heading + " °</p>" +
-                "<p>RSSI: " + data.rssi + " %</p>" +
+                "<p>RSSI: " + (data.rssi <= 100 ? data.rssi + " %" : "Unknown") + "</p>" +
                 "<p>Load: " + data.load + " %</p>" +
                 "<p>Battery Voltage: " + data.battery_voltage + " V</p>" +
                 "<p>Battery Current: " + data.battery_current + " A</p>" +
